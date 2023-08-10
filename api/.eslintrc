@@ -1,0 +1,9 @@
+{
+  "overlay": {
+      "warnings": false,
+      "errors": false
+  },
+  "lintOnSave": false,
+  "extends": "eslint-config-egg",
+  "root": false
+}

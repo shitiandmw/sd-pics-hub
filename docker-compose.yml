@@ -1,0 +1,31 @@
+version: '3'
+services:
+  api:
+    build: .
+    volumes:
+      - ./data/logs:/app/logs
+    ports:
+      - "17001:7001"
+    depends_on:
+      - mongodb
+      - redis
+    container_name: emart-api
+  redis:
+    image: redis
+    command: redis-server --requirepass lfluYk4reffZDjzzXfeNA2ub9odfJ1Ic
+    container_name: emart-redis
+  mongodb:
+    image: mongo:4.4.6
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dbroot
+      MONGO_INITDB_ROOT_PASSWORD: Gri42Mvyk3j2PXIiTdn6CCA8JDSST7yv
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: '2'
+    restart: always
+    container_name: emart-mongodb
+    

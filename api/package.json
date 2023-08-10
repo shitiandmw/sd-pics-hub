@@ -1,0 +1,60 @@
+{
+  "name": "chat-egg-server",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "egg": {
+    "declarations": true
+  },
+  "dependencies": {
+    "axios": "^1.3.4",
+    "chatgpt": "^5.2.2",
+    "crypto-js": "^4.1.1",
+    "egg": "^3",
+    "egg-cors": "^2.2.3",
+    "egg-mongoose": "^3.3.1",
+    "egg-scripts": "^2",
+    "egg-socket.io": "^4.1.6",
+    "egg-validate": "^2.0.2",
+    "https-proxy-agent": "^5.0.1",
+    "luxon": "^3.3.0",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.1",
+    "socks-proxy-agent": "^7.0.0",
+    "socks5-http-client": "^1.0.4",
+    "uuid": "^9.0.0",
+    "xhr2": "^0.2.1"
+  },
+  "devDependencies": {
+    "egg-bin": "^5",
+    "egg-ci": "^2",
+    "egg-mock": "^5",
+    "eslint": "^8",
+    "eslint-config-egg": "^12",
+    "request": "^2.88.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "start": "egg-scripts start -env=prod --title=egg-server-chat-egg-server --sticky",
+    "stop": "egg-scripts stop --title=egg-server-chat-egg-server",
+    "dev": "egg-bin dev --sticky",
+    "debug": "egg-bin debug",
+    "test": "egg-bin test --full-trace",
+    "test-lint": "npm run lint -- --fix && npm run test-local",
+    "cov": "egg-bin cov",
+    "lint": "eslint .",
+    "ci": "npm run lint && npm run cov"
+  },
+  "ci": {
+    "version": "16, 18",
+    "type": "github"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "",
+  "license": "MIT"
+}

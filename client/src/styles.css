@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .phone-container {
+    @apply p-6 w-full h-screen box-border flex flex-col bg-slate-100;
+  }
+
+  .phone-bg {
+    @apply bg-slate-50;
+  }
+}
+
+@layer components {
+  .rainbow {
+    @apply bg-gradient-to-r from-bc to-ec;
+  }
+  .rainbow-bl {
+    @apply bg-gradient-to-bl from-bc to-ec;
+  }
+  .rainbow-tr {
+    @apply bg-gradient-to-tr from-bc to-ec;
+  }
+  .btn-rainbow {
+    @apply w-full rainbow border-0 outline-0 after:border-0 font-bold active:ring-4 active:ring-gray-50 text-white rounded-3xl text-base h-12 flex justify-center items-center active:text-gray-50;
+  }
+  .btn-cancel {
+    @apply w-full bg-gray-100 border-0 outline-0 mb-4 after:border-0  rounded-3xl text-base h-12 flex justify-center items-center font-bold active:ring-4 active:ring-gray-50 text-gray-800 active:text-gray-600;
+  }
+
+  .grod {
+    background-color: red;
+    /*00为左上角，0100%为左下角，100%，0为右上角， 100%%，100%为右下角*/
+    background-image: radial-gradient(
+      circle at 0 100%,
+      transparent 75px,
+      #fff 0
+    );
+  }
+
+  .head-util {
+    @apply h-14 w-full border-b border-gray-100 bg-slate-100 flex  items-center justify-center text-lg;
+  }
+  .loading {
+    @apply w-5 h-5 border-2 border-transparent border-t-gray-200 border-b-gray-200 rounded-full animate-spin mr-2;
+  }
+}
+
+.markdown-body pre {
+  max-width: calc(100vw - 180px) !important;
+}
+.markdown-body ol,ul {
+    list-style: auto;
+}
+
+.vue-simple-markdown{
+    white-space: initial !important; 
+}
