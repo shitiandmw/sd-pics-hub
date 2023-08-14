@@ -107,6 +107,11 @@ function createClient(config, app) {
     else return await client.set(keyName, keyValue_);
   }
 
+  client.sDel = async (keyName) => {
+    keyName = (config.prefix||"base") + ":" + keyName ;
+    return await client.del(keyName);
+  }
+
   // 获得某个Key的值，如果不存在这个key，则从noHaveFunc中获得，并存入缓存
   client.sGet = async (
     keyName,
