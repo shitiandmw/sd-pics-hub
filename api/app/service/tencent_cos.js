@@ -1,6 +1,7 @@
 const { Service } = require('egg');
 const STS = require('qcloud-cos-sts');
 var COS = require('cos-nodejs-sdk-v5');
+const path = require('path');
 
 class TencentCosSevice extends Service {
   /**
@@ -93,9 +94,44 @@ class TencentCosSevice extends Service {
       durationSeconds - 600
     );
     if (!token || !token.credentials || !token.credentials.sessionToken) {
-      await app.redis.sDel(cacheKey);
+      await app.redis.del(cacheKey);
     }
     return token;
+  }
+
+  /**
+   * 压缩图片，上传cos
+   * @param {*} path
+   * @param {*} cos_path
+   *
+   */
+  async uploadImage(sys_path, cos_path, width, height, quality) {
+    if (width || height) {
+      // 临时压缩目录 \\tmp\\compress\\YYYYmmdd
+      let compress_path = this.app.baseDir + `\\tmp\\compress`;
+      let day = this.ctx.ltool.formatTime2(new Date().valueOf(), 'YYYYMMDD');
+      // 删除临时压缩目录下所有不是以 day 命名的文件夹
+      await this.ctx.ltool.deleteDir(compress_path, day);
+
+      // 从info.imgs[i]中获得后缀名
+      let ext = path.basename(sys_path).split('.').pop();
+
+      compress_path = `${compress_path}\\${day}\\${this.ctx.ltool.uuid()}.${ext}`;
+
+      // 压缩图片
+      let compress_res = await this.ctx.ltool.compressImg(
+        sys_path,
+        compress_path,
+        width,
+        height,
+        quality
+      );
+
+      if (!compress_res) throw this.ctx.ltool.err('图片压缩失败', 10012);
+      sys_path = compress_path;
+    }
+    // 上传图片
+    return await this.uploadFile(sys_path, cos_path);
   }
 
   /**
@@ -107,7 +143,7 @@ class TencentCosSevice extends Service {
   async uploadFile(path, cos_path) {
     let cos_path_dir = cos_path.substr(0, cos_path.lastIndexOf('/'));
     let token = await this.getToken(cos_path_dir);
-    if(!token) throw this.ctx.ltool.err('获得临时token失败', 10012);
+    if (!token) throw this.ctx.ltool.err('获得临时token失败', 10012);
     let { app } = this.ctx;
     var cos = new COS({
       getAuthorization: function (options, callback) {
@@ -124,17 +160,16 @@ class TencentCosSevice extends Service {
     if (!app.config.tencent || !app.config.tencent.cos)
       throw this.ctx.ltool.err('腾讯云配置获取失败', 10011);
     let result = await new Promise((resolve, reject) => {
-      let upload_config =  {
+      let upload_config = {
         Bucket:
           app.config.tencent.cos.bucket /* 填入您自己的存储桶，必须字段 */,
         Region:
-          app.config.tencent.cos.region /* 存储桶所在地域，例如 ap-beijing，必须字段 */,
+          app.config.tencent.cos
+            .region /* 存储桶所在地域，例如 ap-beijing，必须字段 */,
         Key: cos_path /* 存储在桶里的对象键（例如1.jpg，a/b/test.txt），必须字段 */,
         FilePath: path /* 必须 */,
         SliceSize:
-          1024 *
-          1024 *
-          5 /* 触发分块上传的阈值，超过5MB使用分块上传，非必须 */,
+          1024 * 1024 * 5 /* 触发分块上传的阈值，超过5MB使用分块上传，非必须 */,
         onTaskReady: function (taskId) {
           /* 非必须 */
           // console.log(taskId);
@@ -143,21 +178,15 @@ class TencentCosSevice extends Service {
           /* 非必须 */
           // console.log(JSON.stringify(progressData));
         },
-        onFileFinish: function (err, data, options) {
-        },
+        onFileFinish: function (err, data, options) {},
       };
-      cos.uploadFile(
-        upload_config,
-        function (err, data) {
-          if(err) reject(err);
-          else resolve(data);
-        }
-      );
+      cos.uploadFile(upload_config, function (err, data) {
+        if (err) reject(err);
+        else resolve(data);
+      });
     });
     return result && result.statusCode == 200;
   }
-
-
 }
 
 module.exports = TencentCosSevice;

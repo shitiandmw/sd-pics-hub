@@ -7,7 +7,9 @@
 const { Controller } = require('egg');
 
 class DoppelgangerController extends Controller {
-    async create(){}
+    async create(){
+        
+    }
     async getList(){}
 }
 

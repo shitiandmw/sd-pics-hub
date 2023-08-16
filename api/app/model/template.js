@@ -5,12 +5,21 @@ module.exports = app => {
     const TemplateSchema = new Schema({
         // 模板图片
         imgs:[
-            {type: String,}
+            {
+                // 压缩图片地址
+                compress_img: {type: String,},
+                // 原图地址
+                origin_img: {type: String,},
+            }
         ],
         // 模板名称
         name: {type: String,},
+        // 模板代码
+        code: {type: String,},
         // 模板描述
         desc:{ type:String ,},
+        // 模板适应性别 0 男 1 女 2 通用
+        sex: {type: Number,},
         // 模板类型
         type: {type: String,},
         // 模板标签
@@ -24,7 +33,8 @@ module.exports = app => {
 
         // 模板参数
         params: { type: Object, },
-
+        // 版本
+        version: { type: Number, default: 1.000 },
         // 热度（使用次数）
         hot: { type: Number, default: 0 },
     });

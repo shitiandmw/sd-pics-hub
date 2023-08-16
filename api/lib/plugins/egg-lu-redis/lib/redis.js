@@ -98,7 +98,6 @@ function createClient(config, app) {
   const _ExpSeconds = 60;
 
   async function setValue(keyName,keyValue,expSeconds = _ExpSeconds,noNull = false) {
-    console.log("redis set keyName",keyName)
     let keyValue_ = keyValue;
     if(typeof keyValue == 'object') keyValue_ = JSON.stringify(keyValue);
     if(noNull && !keyValue || !keyValue_ || keyValue_== "{}" || keyValue_== "[]") return;
@@ -107,18 +106,12 @@ function createClient(config, app) {
     else return await client.set(keyName, keyValue_);
   }
 
-  client.sDel = async (keyName) => {
-    keyName = (config.prefix||"base") + ":" + keyName ;
-    return await client.del(keyName);
-  }
-
   // 获得某个Key的值，如果不存在这个key，则从noHaveFunc中获得，并存入缓存
   client.sGet = async (
     keyName,
     noHaveFunc = null,
     expSeconds = _ExpSeconds
   ) => {
-    keyName = (config.prefix||"base") + ":" + keyName ;
     let result = await client.get(keyName);
     if (!result && typeof noHaveFunc == 'function') {
       result = await noHaveFunc();
@@ -132,7 +125,6 @@ function createClient(config, app) {
 
   // 设置某个缓存
   client.sSet = async (keyName, keyValue, expSeconds = _ExpSeconds) => {
-    keyName = (config.prefix||"base") + ":" + keyName ;
     setValue(keyName,keyValue,expSeconds,false);
   };
 
@@ -144,7 +136,6 @@ function createClient(config, app) {
   // 获取分布式锁（非阻塞）
   // 使用示例：const selfMark = await app.redis.sLock("lock1",20);
   client.sLock = async (keyName, lockExpirySeconds = 10) => {
-    keyName = (config.prefix||"base")+ ":"  + keyName ;
     const selfMark = uuid();
     const lockKey = 'Lock:' + keyName;
     const expMS = lockExpirySeconds * 1000;
@@ -161,7 +152,6 @@ function createClient(config, app) {
   // 释放锁 selfMark:解锁标记，加锁的时候返回
   // 使用示例：if(selfMark) app.redis.sUnLock("lock1",selfMark)
   client.sUnLock = async (keyName, selfMark) => {
-    keyName = (config.prefix||"base") + ":" + keyName ;
     const lockKey = 'Lock:' + keyName;
     return await client.dellock(lockKey, selfMark, () => {});
   };
