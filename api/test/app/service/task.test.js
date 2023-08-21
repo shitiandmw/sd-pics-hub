@@ -8,11 +8,9 @@ describe('test/app/service/task.test.js', () => {
   });
 
   it('generatePortrait()', async () => {
-    
-      const res = await ctx.service.task.generatePortrait("2","64daf1c3ec9f0c3cdcc5c688","11111");
+      const res = await ctx.service.task.generatePortrait("1111","64daf1c3ec9f0c3cdcc5c688","64dca1feb05cad63d8ceb438");
       console.log("generatePortrait res:",res);
       assert(true);
-   
   });
 
   // it('addTaskToQueue()', async () => {
@@ -44,6 +42,14 @@ describe('test/app/service/task.test.js', () => {
   it('addTimeoutTaskToQueue()', async () => {
     const res = await ctx.service.task.addTimeoutTaskToQueue(2);
     console.log("res:",res);
+    assert(true);
+  });
+
+
+  // 
+  it('getTaskInfo()', async () => {
+    const res = await ctx.service.task.getTaskInfo("64dd92c9cb739a3e8c61b23d");
+    console.log("getTaskInfo res:",JSON.stringify(res));
     assert(true);
   });
 

@@ -11,7 +11,6 @@ module.exports = () => {
     const query = socket.handshake.query;
     logger.debug('#connent socket id', id);
     logger.debug('#connent socket query', query);
-
     const nsp = app.io.of('/');
     const tick = (id, msg) => {
       logger.debug('#tick', id, msg);
@@ -34,9 +33,17 @@ module.exports = () => {
       });
       return;
     }
+    // 记录工人上线
+    await ctx.service.worker.workderOnline(
+      query.device_id, 
+      id, 
+      socket.handshake.address, 
+      query.source, 
+      query.state,
+      query.task_types);
     // 用户加入自己的房间
-    socket.join(query.deviceid);
-    logger.debug('#join', query.deviceid);
+    socket.join(query.device_id);
+    logger.debug('#join', query.device_id);
     // // 用户信息
     // const { room, userId } = query;
     // const rooms = [room];
@@ -77,8 +84,9 @@ module.exports = () => {
     await next();
 
     // 用户离开
-    logger.debug('#leave', `socketid: ${id}, deviceid: ${query.deviceid}`);
-
+    logger.debug('#leave', `socketid: ${id}, device_id: ${query.device_id}`);
+    // 记录工人下线
+    await ctx.service.worker.workerOffline(id);
     // // 在线列表
     // nsp.adapter.clients(rooms, (err, clients) => {
     //   logger.debug('#online_leave', clients);

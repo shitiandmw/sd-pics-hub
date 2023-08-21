@@ -26,9 +26,7 @@ module.exports = {
       // 时间戳格式化成可读时间
       formatTime2(timestamp, format) {
         if (!format) format = 'YYYY-MM-DD HH:mm:ss';
-        console.log('timestamp', new Date().valueOf());
         let result = new Date();
-        console.log('timestamp', result);
         if (typeof timestamp == 'number') result = new Date(timestamp);
         result = moment(result).format(format);
         return result;

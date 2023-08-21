@@ -15,7 +15,7 @@ class TaskSevice extends Service {
    */
   async generatePortrait(user_id, template_id, doopelganger_id) {
     const { ctx } = this;
-    let template = await this.ctx.service.template.info(template_id);
+    let template = await this.ctx.service.template.detail(template_id);
     if (!template) throw ctx.ltool.err('模板不存在', 10001);
 
     // 每个人暂时只能有一个正在执行的同类型任务
@@ -23,13 +23,19 @@ class TaskSevice extends Service {
       user_id: user_id,
       type: 2,
     });
-    console.log("task_count",task_count);
     if (task_count >= 1)
       throw ctx.ltool.err(
         '您有一个写真任务正在进行，请等待任务完成后再创建新的任务',
         10002
       );
 
+    // 验证数字分身是否属于当前用户
+    let doopelganger = await this.ctx.model.Doppelganger.findOne({
+      _id: doopelganger_id,
+      user_id: user_id,
+    });
+    if (!doopelganger) throw ctx.ltool.err('数字分身不存在', 10003); 
+    
     let task = new this.ctx.model.Task({
       user_id: user_id,
       first_img: {
@@ -41,6 +47,8 @@ class TaskSevice extends Service {
       params: {
         template_id: template_id,
         doopelganger_id: doopelganger_id,
+        template: template,
+        doopelganger: doopelganger,
       },
       create_time: new Date().getTime(),
     });
@@ -113,6 +121,9 @@ class TaskSevice extends Service {
     return result;
   }
 
+  async getTaskInfo(task_id){
+    return  await this.ctx.model.Task.findOne({_id: task_id});
+  }
   /**
    * 清理任务队列
    * 主要是从doing队列中把任务加入到有序队列中，方便将超时的任务重新加入到任务队列中  
@@ -134,7 +145,7 @@ class TaskSevice extends Service {
       for(let i=0; i<tasks.length; i++){
         let task_id = tasks[i];
         let task = await this.ctx.model.Task.findOne({_id: task_id});
-        if(task) await app.redis.zadd('task_queue_doing_' + type, task.start_time + timeout, task_id);
+        if(task) await app.redis.zadd('reload:task_queue_doing_' + type, task.start_time + timeout, task_id);
       }
     }
     return tasks.length;    
@@ -147,7 +158,8 @@ class TaskSevice extends Service {
   async addTimeoutTaskToQueue(type){
     const { app } = this;
     let now = new Date().getTime();
-    let tasks = await app.redis.zrangebyscore('task_queue_doing_' + type, 0, now);
+    let tasks = await app.redis.zrangebyscore('reload:task_queue_doing_' + type, 0, now);
+    await app.redis.zremrangebyscore('reload:task_queue_doing_' + type, 0, now);
     if(tasks){
       for(let i=0; i<tasks.length; i++){
         let task_id = tasks[i];
