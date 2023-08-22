@@ -9,6 +9,8 @@ const os = require('os');
 const fs = require('fs');
 const sharp = require('sharp');
 const base64 = require('base64-js');
+const tencent_cos = require('./tencent_cos');
+var ltool = require('./ltool');
 
 const config = {
   source: 'aliyun',
@@ -16,10 +18,14 @@ const config = {
     host: 'http://127.0.0.1:7002',
     token: '123456',
   },
+  api: {
+    host: 'http://127.0.0.1:7002',
+  },
   sd_base_url: 'http://175.178.243.32:27301',
 };
 
 const io = require('socket.io-client');
+const path = require('path');
 // 状态  0: 空闲 1: 已发布任务 2: 已接受任务 3: 工作中 4: 任务完成正在上传结果
 let worker_state = 0;
 let worker_thread = null;
@@ -124,7 +130,7 @@ async function getDrawProgress() {
       '/sdapi/v1/progress?skip_current_image=true',
       'GET',
       null,
-      500
+      1000
     );
     result = result.data;
   } catch (error) {}
@@ -135,9 +141,28 @@ async function getDrawProgress() {
 async function getMemoryInfo() {
   let result = {};
   try {
-    result = await request('/sdapi/v1/memory', 'GET', null, 500);
+    result = await request('/sdapi/v1/memory', 'GET', null, 1000);
     result = result.data;
   } catch (error) {}
+  return result;
+}
+
+// 使用APItoken获得cos的临时token信息
+async function getCosToken(api_token) {
+  let result = null;
+  try {
+    result = await request(
+      `${config.api.host}/task_cos/gettoken?token=${api_token}`,
+      'GET',
+      null,
+      500
+    );
+    result = result.data;
+    if (!result.status || result.code != 1) result = null;
+    else result = result.data;
+  } catch (error) {
+    console.error(error);
+  }
   return result;
 }
 /**
@@ -159,28 +184,16 @@ async function doTask(socket_, task_info) {
 }
 
 async function encodeImageToBase64(image_url) {
-
-  let response = await request(
-    image_url,
-    'GET',
-    null,
-    5000,
-    'arraybuffer'
-  );
+  let response = await request(image_url, 'GET', null, 5000, 'arraybuffer');
   // Encode into PNG and convert to Base64
-  const encodedBuffer = await sharp(response.data)
-    .toFormat('png')
-    .toBuffer();
+  const encodedBuffer = await sharp(response.data).toFormat('png').toBuffer();
 
   const encodedImage = encodedBuffer.toString('base64');
   return encodedImage;
 }
 
-
-
 // 执行第二类任务
-async function doTask2(socket_,task_info) {
-  console.log('dotask ing....');
+async function doTask2(task_info) {
   let result = {
     code: 1,
   };
@@ -198,7 +211,9 @@ async function doTask2(socket_,task_info) {
     }
     // roop 模式
     else if (clone_info.type == 1) {
-      let image_data = await encodeImageToBase64(clone_info.train_imgs[0].origin_img);
+      let image_data = await encodeImageToBase64(
+        task_info.cos_host + clone_info.train_imgs[0].origin_img
+      );
       task_params.alwayson_scripts = {
         roop: {
           args: [
@@ -221,7 +236,6 @@ async function doTask2(socket_,task_info) {
       60000 * 10
     );
     result.data = response.data.images;
-
   } catch (error) {
     console.error(error);
     result = {
@@ -247,10 +261,10 @@ async function doTask2(socket_,task_info) {
       device_id: device_config.device_id,
       state: worker_state,
       // 能执行的任务类型 1数字模型 2写真 3高清化
-      task_types: JSON.stringify([2,3]),
+      task_types: JSON.stringify([2, 3]),
     },
   });
-  socket.on('connect',async data => {
+  socket.on('connect', async data => {
     console.log('connect', data);
     await scheduleUpdate(socket);
     socket.emit('exchange', {
@@ -270,27 +284,70 @@ async function doTask2(socket_,task_info) {
   socket.on('welcome', data => {
     console.log('### welcome', data);
   });
-  socket.on('message',async data => {
-    console.log('### message', data);
+  socket.on('message', async data => {
+    console.log('### message', JSON.stringify(data));
     switch (data.action) {
       case 'task':
         // 更新状态
         worker_state = 3;
         await updState(socket);
+        console.log("准备执行任务...");
         // 执行任务
         data.data.cos_host = data.cos_host;
-        let task_result = await doTask2(socket, data.data);
+        let task_result = await doTask2(data.data);
+        console.log("任务执行完成，正在上传结果...");
         // 更新状态
-        worker_state = 0;
+        worker_state = 4;
         await updState(socket);
 
         // 上传结果
-        if(task_result.code && task_result.code == 0) {
+        if (task_result.code && task_result.code == 1) {
+          // 保存图片到临时目录
+          let compress_path = __dirname + `\\tmp\\result`;
+          let day = ltool.formatTime2(new Date().valueOf(), 'YYYYMMDD');
+          // 删除临时压缩目录下非当天的文件夹
+          await ltool.deleteDir(compress_path, day);
+          for (let index = 0; index < task_result.data.length; index++) {
+            const element = task_result.data[index];
+            let filename = ltool.uuid() + '.png';
+            let filepath = `${compress_path}\\${day}\\${filename}`;
+            if (!fs.existsSync(`${compress_path}\\${day}`))
+              fs.mkdirSync(`${compress_path}\\${day}`, { recursive: true });
+            fs.writeFileSync(filepath, base64.toByteArray(element));
+            task_result.data[index] = filepath;
+          }
+          // 将图片上传到cos
+          let cos_token = await getCosToken(data.token);
+
+          let cos = new tencent_cos({
+            getToken: () => {
+              return cos_token;
+            },
+          });
+          let result_images = [];
+          for (let index = 0; index < task_result.data.length; index++) {
+            const element = task_result.data[index];
+            const filename = path.basename(element);
+            let cos_path = `${cos_token.path}/${filename}`;
+            let cos_compress_path = `${cos_token.path}/compress/${filename}`;
+            await cos.uploadFile(element, cos_path);
+            await cos.uploadFile(element, cos_compress_path, 500, 0, 85);
+            result_images.push({
+              origin_img: cos_path,
+              compress_img: cos_compress_path,
+            });
+          }
+          task_result.data = result_images;
         }
-        else  socket.emit('exchange', {
+        task_result.token = data.token;
+        socket.emit('exchange', {
           action: 'task_result',
           data: JSON.stringify(task_result),
         });
+        console.log("结果上传完毕...",task_result);
+        // 更新状态
+        worker_state = 0;
+        await updState(socket);
         break;
       default:
         break;

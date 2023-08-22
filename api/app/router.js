@@ -17,12 +17,15 @@ module.exports = app => {
   
   /**---------------- 数字分身 ----------------**/
   router.post('/doppelganger/create', controller.doppelganger.create); // 创建数字分身
-  router.post('/doppelganger/list', controller.doppelganger.getList);    // 查看数字分身列表
+  router.get('/doppelganger/list', controller.doppelganger.getList);    // 查看数字分身列表
 
   /**---------------- 任务相关 ----------------**/
   router.post('/task/create', controller.task.create); // 创建任务 (生成写真、高清修图)
-  router.post('/task/list', controller.task.getList);  // 查看任务列表
-  router.post('/task/info', controller.task.getInfo);  // 查看任务详情
+  router.get('/task/list', controller.task.getList);  // 查看任务列表
+  router.get('/task/info', controller.task.getInfo);  // 查看任务详情
+
+  /**---------------- cos相关 ----------------**/
+  router.get('/task_cos/gettoken', controller.taskCos.getToken);  // 查看任务详情
   
 
   router.post('/account/register', controller.account.register);

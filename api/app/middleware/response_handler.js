@@ -3,7 +3,7 @@ async function verifyPermission(ctx) {
   let fag = false;
   do {
     // 控制器 account、default 下的接口不需要认证
-    const ignore = ['/account/','/default/'];
+    const ignore = ['/account/','/default/','/task_cos/'];
     console.log("ctx.request.url",ctx.request.url)
     console.log("ctx.request.url",ctx.request.url == '/')
     for (let index = 0; index < ignore.length; index++) {

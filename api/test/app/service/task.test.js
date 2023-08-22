@@ -13,11 +13,12 @@ describe('test/app/service/task.test.js', () => {
       assert(true);
   });
 
-  // it('addTaskToQueue()', async () => {
-  //   const res = await ctx.service.task.addTaskToQueue({_id:"22222", type:2});
-  //   console.log("addTaskToQueue res:",res);
-  //   assert(true);
-  // });
+  it('addTaskToQueue()', async () => {
+    let task_info = await ctx.service.task.getTaskInfo("64dd92c9cb739a3e8c61b23d");
+    const res = await ctx.service.task.addTaskToQueue(task_info);
+    console.log("addTaskToQueue res:",res);
+    assert(true);
+  });
  
   it('popTaskFromQueue()', async () => {
     const res = await ctx.service.task.popTaskFromQueue(2);
@@ -50,6 +51,14 @@ describe('test/app/service/task.test.js', () => {
   it('getTaskInfo()', async () => {
     const res = await ctx.service.task.getTaskInfo("64dd92c9cb739a3e8c61b23d");
     console.log("getTaskInfo res:",JSON.stringify(res));
+    assert(true);
+  });
+
+
+  it('createTaskToken()', async () => {
+    let taskinfo = await ctx.service.task.getTaskInfo("64dd92c9cb739a3e8c61b23d");
+    const res = await ctx.service.task.createTaskToken(taskinfo);
+    console.log("createTaskToken res:",JSON.stringify(res));
     assert(true);
   });
 

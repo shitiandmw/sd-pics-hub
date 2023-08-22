@@ -19,6 +19,9 @@ class NspController extends Controller {
         case 'device_info':
           await this.updateDeviceInfo(socket.id, message.data);
           break;
+        case 'task_result':
+          await this.taskResult(socket.id, message.data);
+          break;
         default:
           break;
       }
@@ -42,43 +45,56 @@ class NspController extends Controller {
         let data_old = await app.redis.sGet(cache_key, () => {
           return null;
         });
-        let data_key_changed =
-          !data_old || data_old.data_key != data_key;
+        let data_key_changed = !data_old || data_old.data_key != data_key;
 
-        console.log(`[${socket_id}]workerState`,data_key_changed ? data : 'no update');
-        if (data_key_changed) {
-          // 如果上次的状态是发布任务，需要锁定状态，在工人回复接收或工作中之前，不能再次发布任务
-          if (data_old && data_old.data.state == 1 && data.state < 1)
-            data.state = 1;
-          // 更新工人状态信息到数据库
-          let work_info = await ctx.service.worker.updateWorkerState(socket_id, data);
+        console.log(
+          `[${socket_id}]workerState`,
+          data_key_changed ? data : 'no update'
+        );
 
-          // 如果是空闲状态，尝试取任务
-          if (data.state == 0 && work_info) {
-            for (let i = 0; i < work_info.task_types.length; i++) {
-              let task = await ctx.service.task.popTaskFromQueue(work_info.task_types[i]);
-              if (task) {
-                // 发送任务信息给工人
-                ctx.socket.emit('message', {
-                  action : "task",
-                  data : task,
-                  cos_host : ctx.app.config.tentcent.cos.host || ""
-                });
-                // 记录工人状态
-                data.state = 1;
-                // 更新状态到数据库
-                await ctx.service.worker.updateWorkerState(socket_id, { state: 1 });
-                break;
-              }
+        // 如果上次的状态是发布任务，需要锁定状态，在工人回复接收或工作中之前，不能再次发布任务
+        if (data_old && data_old.data.state == 1 && data.state < 1)
+          data.state = 1;
+        // 更新工人状态信息到数据库
+        let work_info = await ctx.service.worker.updateWorkerState(
+          socket_id,
+          data
+        );
+
+        // 如果是空闲状态，尝试取任务
+        if (data.state == 0 && work_info && data.memory_info != '{}') {
+          for (let i = 0; i < work_info.task_types.length; i++) {
+            let task = await ctx.service.task.popTaskFromQueue(
+              work_info.task_types[i]
+            );
+            if (task) {
+              let task_token = await ctx.service.task.createTaskToken(task);
+              // 发送任务信息给工人
+              ctx.socket.emit('message', {
+                action: 'task',
+                data: task,
+                cos_host: app.config.tencent.cos.host || '',
+                token: task_token,
+              });
+              // 记录工人状态
+              data.state = 1;
+              // 更新状态到数据库
+              await ctx.service.worker.updateWorkerState(socket_id, {
+                state: 1,
+              });
+              break;
             }
-           
           }
 
           // 记录上次更新信息到缓存
-          app.redis.sSet(cache_key, {
-            data_key: data_key,
-            data: data,
-          },300);
+          app.redis.sSet(
+            cache_key,
+            {
+              data_key: data_key,
+              data: data,
+            },
+            300
+          );
         }
       } catch (error) {
       } finally {
@@ -99,6 +115,21 @@ class NspController extends Controller {
     console.log(`[${socket_id}]updateDeviceInfo`, device_info.Platform);
     await ctx.service.worker.updateDeviceInfo(socket_id, device_info);
   }
+
+
+  /**
+   * 更新任务结果 
+   * @param {*} socket_id 
+   * @param {*} data 
+   */
+  async taskResult(socket_id, data) {
+    const { ctx, app } = this;
+    let task_result = JSON.parse(data);
+    console.log(`[${socket_id}]taskResult`, task_result);
+    await ctx.service.task.updateTaskResult(task_result);
+
+  }
+
 }
 
 module.exports = NspController;
