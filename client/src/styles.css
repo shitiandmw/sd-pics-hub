@@ -3,13 +3,22 @@
 @tailwind utilities;
 
 @layer base {
+  body,uni-page-body {
+    @apply h-full;
+  }
   .phone-container {
-    @apply p-6 w-full h-screen box-border flex flex-col bg-slate-100;
+    @apply w-full min-h-full box-border flex flex-col bg-slate-100;
   }
 
   .phone-bg {
     @apply bg-slate-50;
   }
+
+  /* @supports (-webkit-touch-callout: none) {
+    .phone-container {
+      @apply h-safari-screen ;
+    }
+  } */
 }
 
 @layer components {
@@ -50,10 +59,11 @@
 .markdown-body pre {
   max-width: calc(100vw - 180px) !important;
 }
-.markdown-body ol,ul {
-    list-style: auto;
+.markdown-body ol,
+ul {
+  list-style: auto;
 }
 
-.vue-simple-markdown{
-    white-space: initial !important; 
+.vue-simple-markdown {
+  white-space: initial !important;
 }

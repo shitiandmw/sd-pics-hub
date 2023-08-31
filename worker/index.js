@@ -330,8 +330,8 @@ async function doTask2(task_info) {
             const filename = path.basename(element);
             let cos_path = `${cos_token.path}/${filename}`;
             let cos_compress_path = `${cos_token.path}/compress/${filename}`;
-            await cos.uploadFile(element, cos_path);
-            await cos.uploadFile(element, cos_compress_path, 500, 0, 85);
+            await cos.uploadImage(element, cos_path);
+            await cos.uploadImage(element, cos_compress_path, 350, 0, 85);
             result_images.push({
               origin_img: cos_path,
               compress_img: cos_compress_path,

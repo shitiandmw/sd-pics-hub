@@ -40,6 +40,8 @@ module.exports = app => {
     ],
     // 任务执行结果备注
     result_remark: { type: String },
+    // 任务排名 （获取数据的时候从redis中获取）
+    rank: { type: Number },
   });
 
   let schema = mongoose.model('Task', TaskSchema);

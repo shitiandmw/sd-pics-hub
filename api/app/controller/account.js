@@ -68,7 +68,7 @@ class AccountController extends Controller {
       {
         account: { type: 'string', required: true },
         nick_name: { type: 'string', required: true },
-        pwd: { type: 'password', required: true },
+        pwd: { type: 'password', required: true ,message:"密码格式不正确" },
       },
       input
     );

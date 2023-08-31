@@ -216,7 +216,18 @@ class TaskSevice extends Service {
   /**
    * 获得我的任务列表
    */
-  async getList(user_id) {}
+  async getMyList(user_id, page = 1, page_size = 10 ) {
+    const { app, ctx } = this;
+    // 获得我的任务列表
+    let list = await ctx.model.Task.find({ user_id: user_id },"name first_img type status create_time result rank").sort({create_time:-1}).skip((page-1)*page_size).limit(page_size);
+    if(!list) return [];
+    // 获得任务排名
+    for (let i = 0; i < list.length; i++) {
+      let task = list[i];
+      task.rank = await this.getTaskRanking(task);
+    }
+    return list;
+  }
 
   /**
    * 保存任务token和任务信息的对应关系

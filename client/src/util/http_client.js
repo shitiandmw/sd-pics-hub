@@ -127,6 +127,11 @@ const errback = (error, config) => {
     }
     return Promise.resolve(error);
   }
+  else uni.showToast({
+    title: "网络错误，请稍后重试",
+    icon: "error",
+    duration: 2000,
+  });
   return Promise.resolve({
     data: error.message,
   });

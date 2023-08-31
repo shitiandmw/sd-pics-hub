@@ -2,26 +2,21 @@
   // 可以使用 uni-simple-router 来定义类似vue的路由，暂时不研究
   "pages": [
     {
-      "path": "pages/index/login"
+      "path": "pages/guide/index",
+      "style": {
+        "app-plus": {
+          "softinputMode": "adjustPan"
+        }
+      }
     },
     {
-      "path": "pages/tab/session"
+      "path": "pages/guide/step"
     },
     {
-      "path": "pages/index/register"
+      "path": "pages/tab/tasks"
     },
-    // {
-    //   "path": "pages/other/session_detail",
-    //   "style": {
-    //     "app-plus": {
-    //       // 软键盘弹出模式，支持 adjustResize、adjustPan 两种模式 主要解决弹出键盘页面错乱问题
-    //       "softinputMode": "adjustResize"
-    //     }
-    //   }
-    // },
-   
     {
-      "path": "pages/tab/a_book"
+      "path": "pages/tab/templates"
     },
     {
       "path": "pages/tab/my"
@@ -34,22 +29,22 @@
     "backgroundColor": "#ffffff",
     "list": [
       {
-        "pagePath": "pages/tab/session",
+        "pagePath": "pages/tab/templates",
         "iconPath": "static/icon/icon-my.png",
         "selectedIconPath": "static/icon/icon-a-my.png",
-        "text": "组件"
+        "text": ""
       },
       {
-        "pagePath": "pages/tab/a_book",
+        "pagePath": "pages/tab/tasks",
         "iconPath": "static/icon/icon-my.png",
         "selectedIconPath": "static/icon/icon-a-my.png",
-        "text": "接口"
+        "text": ""
       },
       {
         "pagePath": "pages/tab/my",
         "iconPath": "static/icon/icon-my.png",
         "selectedIconPath": "static/icon/icon-a-my.png",
-        "text": "接口"
+        "text": ""
       }
     ]
   },

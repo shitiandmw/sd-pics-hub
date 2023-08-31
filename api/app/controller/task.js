@@ -7,11 +7,33 @@
 const { Controller } = require('egg');
 
 class TaskController extends Controller {
-    async create(){
+    
+    async generatePortrait(){
+        const { ctx, app } = this;
+        const input = ctx.request.body;
+        // 验证参数合法性
+        const errors = app.validator.validate(
+          {
+            template_id: { type: 'string', required: true ,max: 24, min: 24},
+            doopelganger_id: {type: 'string', required: true,max: 24, min: 24},
+          },
+          input
+        );
+        if (errors && errors.length > 0)
+          throw ctx.ltool.err(`"${errors[0].field}"${errors[0].message}`, 40011);
         
+        let task = await ctx.service.task.generatePortrait(ctx.user.id, input.template_id, input.doopelganger_id);
+        if(!task) throw ctx.ltool.err('创建任务失败', 40012);
+        ctx.body = task._id;
     }
-    async getList(){}
-    async getInfo(){}
+    async getList(){
+        const { ctx } = this;
+        let list = await ctx.service.task.getMyList(ctx.user.id);
+        ctx.body = list;
+    }
+    // async getInfo(){
+
+    // }
 }
 
 module.exports = TaskController;

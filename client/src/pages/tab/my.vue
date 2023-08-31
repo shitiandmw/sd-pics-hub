@@ -4,8 +4,8 @@
         <head-bar></head-bar>
     </div>
 		<div class="flex-1" >
-            <div class="py-10 px-8 bg-white flex items-center cursor-pointer" @tap="goDetail">
-                <image class="w-18 h-18 rounded-md" :src="user.avatar" alt="">
+            <div class="py-10 px-8 bg-white flex items-center cursor-pointer" v-if="user" @tap="goDetail">
+                <image class="w-18 h-18 rounded-md"  :src="user.avatar" alt="">
                 <div class="flex-1 ml-6">
                     <div class="text-2xl">{{user.nick_name}}</div>
                     <div class="text-lg h-10 flex items-center text-gray-500">联系号码：{{user.contact_num}}</div>

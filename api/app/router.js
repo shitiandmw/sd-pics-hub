@@ -6,7 +6,7 @@
 module.exports = app => {
   const { router, controller, io  } = app;
   router.get('/', controller.home.index);
-  // 手机号验证码登录
+  // 手机号验证码登录 （短信成本过高，暂时不做）
   router.post('/account/phone_login', controller.account.phoneLogin);
   router.post('/account/send_sms', controller.account.sendSMS);
 
@@ -20,12 +20,12 @@ module.exports = app => {
   router.get('/doppelganger/list', controller.doppelganger.getList);    // 查看数字分身列表
 
   /**---------------- 任务相关 ----------------**/
-  router.post('/task/create', controller.task.create); // 创建任务 (生成写真、高清修图)
+  router.post('/task/generate_portrait', controller.task.generatePortrait); // 创建任务写真任务
   router.get('/task/list', controller.task.getList);  // 查看任务列表
-  router.get('/task/info', controller.task.getInfo);  // 查看任务详情
+  // router.get('/task/info', controller.task.getInfo);  // 查看任务详情
 
   /**---------------- cos相关 ----------------**/
-  router.get('/task_cos/gettoken', controller.taskCos.getToken);  // 查看任务详情
+  router.get('/task_cos/gettoken', controller.taskCos.getToken);  // 获得任务的cos上传临时token
   
 
   router.post('/account/register', controller.account.register);

@@ -60,14 +60,14 @@ class UserSevice extends Service {
       throw ctx.ltool.err('登录失败', 2002);
 
     // 随机数不能使用多次
-    const isRe = await app.redis.sGet(
-      'userKeyLogin_random_number_' + input.random_number,
+    const isRe = await app.redis.sGet('userKeyLogin_random_number_' + input.random_number,
       async () => {
         return -1;
       },
       ctx.lconst.hour1
     );
     if (isRe > 0) throw ctx.ltool.err('登录失败', 2003);
+    
     await app.redis.sSet(
       'userKeyLogin_random_number_' + input.random_number,
       1,

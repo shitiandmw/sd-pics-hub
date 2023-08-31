@@ -6,10 +6,12 @@ import Socket from './util/socket/client';
 
 import tabBar from 'components/tabbar.vue'
 import head from 'components/head.vue'
+import phoneContainer from 'components/phone-container.vue'
 import loading1 from 'components/loading1.vue'
 Vue.component('tab-bar',tabBar)
 Vue.component('head-bar',head)
 Vue.component('load-panl1',loading1)
+Vue.component('phone-container',phoneContainer)
 
 import VueSimpleMarkdown from 'vue-simple-markdown'
 import 'vue-simple-markdown/dist/vue-simple-markdown.css'
