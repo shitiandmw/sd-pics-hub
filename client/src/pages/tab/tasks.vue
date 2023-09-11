@@ -13,7 +13,7 @@
           v-for="(item, index) in 5"
           :key="'k' + index"
         >
-          <div class="text-xl h-8">古风写真</div>
+          <div class="text-xl h-8 text-sky-900">古风写真</div>
           <div
             class="group grid gap-2"
             :class="
@@ -33,7 +33,7 @@
               alt=""
             />
           </div>
-          <div class="text-sm text-blue-500 flex items-center space-x-1">
+          <div class="text-sm text-blue-500 text-sky-700 flex items-center space-x-1">
             <span>任务排队中，当前第111位</span>
             <div class="w-4 text-blue-500 overflow-hidden">
               <svg-more class="animate-popup3"></svg-more>
