@@ -22,7 +22,7 @@
           <!-- 2.制作数字分身 -->
           <div v-if="step_index == 1">
             <div class="mt-8 text-2xl mb-1">制作数字分身</div>
-            <div class="text-base text-gray-500 mb-2">
+            <div class="text-base text-gray-500 mb-6">
               制作一个你的数字分身，用于代替你在虚拟世界拍摄写真
             </div>
             <addDoppelganger></addDoppelganger>
