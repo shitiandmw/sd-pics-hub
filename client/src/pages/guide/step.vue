@@ -27,6 +27,20 @@
             </div>
             <addDoppelganger></addDoppelganger>
           </div>
+
+           <!-- 3.完成 -->
+           <div v-if="step_index == 2">
+            <div class="mt-32 mb-10 flex items-center justify-center">
+               <div class="w-24 h-24 text-green-500">
+                  <svgSuccess></svgSuccess>
+               </div>
+            </div>
+            <div class="text-lg text-gray-600 mb-6 text-center">
+              任务处理中，您可以先看看其他的模板
+            </div>
+
+            <lbutton class="shadow-xl mt-24 ">去逛逛</lbutton>
+          </div>
         </scroll-view>
       </div>
     </div>
@@ -48,6 +62,7 @@ import lbutton from "@/components/button.vue";
 import steps from "./components/steps.vue";
 import cbutton from "@/components/button.vue";
 import lpopup from "@/components/popup.vue";
+import svgSuccess from "@/components/svg/svg-success.vue";
 
 import templates from "../components/templates.vue";
 import templateDetail from "../components/templateDetail.vue";
@@ -56,7 +71,7 @@ import addDoppelganger from "../components/addDoppelganger.vue";
 export default {
   data() {
     return {
-      step_index: 1,
+      step_index: 2,
       template: {
         _id: "",
         show: true,
@@ -77,6 +92,7 @@ export default {
     lpopup,
     lbutton,
     addDoppelganger,
+    svgSuccess,
   },
 };
 </script>
