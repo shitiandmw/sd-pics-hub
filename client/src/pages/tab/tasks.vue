@@ -7,7 +7,7 @@
       <div class="w-5 h-5 box-content p-2 pr-0 cursor-pointer" @tap="addTask" ><svgAddTask></svgAddTask></div>
 		</div>
     <div class="flex-1 overflow-hidden">
-      <template>
+      <template v-if="list!=null">
         <scroll-view class="h-full" scroll-y="true">
           <div
             class="border-b-px border-b-gray-100 py-4 bg-white space-y-1 px-4"
@@ -61,7 +61,7 @@ import svgAddTask from "@/components/svg/svg-addtask.vue";
 export default {
   data() {
     return {
-      loading:false,
+      firstload:false,
       list: null,
       error:"",
     };

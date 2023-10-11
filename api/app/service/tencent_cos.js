@@ -194,7 +194,7 @@ class TencentCosSevice extends Service {
       // 从info.imgs[i]中获得后缀名
       let ext = path.basename(sys_path).split(".").pop();
 
-      compress_path = `${compress_path}\\${day}\\${this.ctx.ltool.uuid()}.${ext}`;
+      compress_path = `${compress_path}${path.sep}${day}${path.sep}${this.ctx.ltool.uuid()}.${ext}`;
 
       // 压缩图片
       let compress_res = await this.ctx.ltool.compressImg(
