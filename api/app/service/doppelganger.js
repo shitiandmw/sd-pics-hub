@@ -9,7 +9,13 @@ class DoppelgangerSevice extends Service {
    * @param {*} train_imgs 
    */
   async create(user_id, name, type, train_imgs){
-    let doppelganger = new this.ctx.model.Doppelganger({
+    if(!name)
+    {
+      let user = await this.ctx.service.user.findUserbyId(user_id);
+      let count = await this.getUserCount(user_id);
+      name = `${user.nick_name}的数字分身${count+1}`;
+    }
+    let data = {
       user_id: user_id,
       name: name,
       type: type,
@@ -21,7 +27,8 @@ class DoppelgangerSevice extends Service {
       train_end_time: 0,
       train_status: 0,
       is_delete: 0
-    });
+    };
+    let doppelganger = new this.ctx.model.Doppelganger(data);
     let result = await doppelganger.save();
     return result;
     // 创建训练任务需要在支付成功后执行 （测试阶段直接开启）
@@ -35,6 +42,8 @@ class DoppelgangerSevice extends Service {
   async getList(user_id){
     return await this.ctx.model.Doppelganger.find({user_id:user_id, is_delete:0},"name type train_imgs train_status");
   }
+
+
 
   /**
    * 获得数字分身详情
@@ -52,6 +61,15 @@ class DoppelgangerSevice extends Service {
    */
   async del(id){
     return await this.ctx.model.Doppelganger.updateOne({_id:id}, {is_delete:1});
+  }
+
+  /**
+   * 获得某用户的数字分身数量
+   * @param {*} user_id 
+   * @returns 
+   */
+  async getUserCount(user_id){
+    return await this.ctx.model.Doppelganger.countDocuments({user_id:user_id, is_delete:0});
   }
 }
 

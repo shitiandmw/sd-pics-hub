@@ -1,30 +1,54 @@
 <template>
   <view class="w-full">
-     <view class="flex flex-col py-4 space-y-2">
-        <view class="text-2xl">古风写真</view>
-        <view class="text-base text-gray-500">夜游西湖月如钩，把酒问天两相愁。美景如诗道不得，只因此女画中游。</view>
+    <template v-if="!item">
+    <view class="animate-pulse">
+      <view class="flex flex-col py-4 space-y-2">
+        <view class="text-2xl  bg-gray-200 h-10 w-32"></view>
+        <view class="text-base text-gray-500  bg-gray-200 h-6"></view>
+     </view>
+     <view class="h-56 bg-gray-200">
+     </view>
+    </view>
+    </template>
+    <template v-else>
+      <view class="flex flex-col py-4 space-y-2">
+        <view class="text-2xl">{{item.name}}</view>
+        <view class="text-base text-gray-500">{{item.desc}}</view>
      </view>
      <view class="flex flex-col space-y-2">
-      <image  src="https://file-1305732628.cos.ap-guangzhou.myqcloud.com/r/1111/64dd92c9cb739a3e8c61b23d/0ced3d6f-084e-442c-9dda-5ea6dbf45c9f.png" class="w-full" mode="widthFix" alt="">
-      <image  src="https://file-1305732628.cos.ap-guangzhou.myqcloud.com/r/1111/64dd92c9cb739a3e8c61b23d/16e665ed-2a68-4e42-95ed-c2591a3635d1.png" class="w-full"  mode="widthFix" alt="">
-      <image  src="https://file-1305732628.cos.ap-guangzhou.myqcloud.com/r/1111/64dd92c9cb739a3e8c61b23d/23a5df3b-4390-45a6-9765-ae09fd22b921.png" class="w-full"  mode="widthFix" alt="">
-     </view>
+      <image v-for="(img,index) in item.imgs" :key="'i'+index"  :src="cos_host+img.compress_img" class="w-full" mode="widthFix" alt="">
+      </view>
+    </template>
+     
   </view>
 </template>
 
 <script>
 import { mapState } from "vuex";
 export default {
+  props: ["id"],
   data() {
     return {
       head_margin_top: "",
+      error: "",
+      item: null,
+      cos_host:process.env.VUE_APP_COS_HOST
     };
   },
-  mounted() {
+  async mounted() {
+    await this.getDetail();
   },
   methods: {
+    async getDetail() {
+      const url = "/template/info";
+      const params = { id : this.id};
+      const res = await this.$http.get(url, params, 2);
+      console.log("res", res);
+      if (res && res.code == 1) {
+        this.item = res.data;
+      } else this.error = res.message;
+    },
   },
-  computed: {
-  },
+  computed: {},
 };
 </script>

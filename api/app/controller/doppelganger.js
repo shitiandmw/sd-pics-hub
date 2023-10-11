@@ -14,7 +14,7 @@ class DoppelgangerController extends Controller {
     // 验证参数合法性
     const errors = app.validator.validate(
       {
-        name: { type: 'string', required: true ,max: 50, min: 1},
+        // name: { type: 'string', max: 50},
         type: {type: 'enum', values: [1, 2]},
         train_imgs: { type: 'array', required: true, itemType: 'string', rule : { type:'string', allowEmpty: false} },
       },
@@ -33,6 +33,23 @@ class DoppelgangerController extends Controller {
     const { ctx } = this;
     let list = await ctx.service.doppelganger.getList(ctx.user.id);
     ctx.body = list;
+  }
+
+  async getCosToken(){
+    const { ctx , app } = this;
+    const input = ctx.request.query;
+    // 验证参数合法性
+    const errors = app.validator.validate(
+      {
+        ext: {type: 'enum', values: ["jpg", "jpeg", "png", "gif", "bmp"],required: true}
+      },
+      input
+    );
+    if (errors && errors.length > 0)
+      throw ctx.ltool.err(`"${errors[0].field}"${errors[0].message}`, 40011);
+    
+    let res = await ctx.service.tencentCos.getUniDoppelgangerUploadInfo(ctx.user.id,input.ext);
+    ctx.body = res;
   }
 }
 

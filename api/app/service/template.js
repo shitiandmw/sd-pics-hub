@@ -10,7 +10,10 @@ class TemplateSevice extends Service {
    */
   async listFilesInFolder(folderPath) {
     try {
-      const files = await fsPromises.readdir(this.app.baseDir + folderPath); // Use fsPromises instead of fs
+      const file_path = this.app.baseDir + folderPath;
+      const files = await fsPromises.readdir(file_path); // Use fsPromises instead of fs
+      console.log("file_path",file_path)
+      console.log("files.length",files.length)
       const fileNames = [];
       for (const file of files) {
         let filename = path.join(this.app.baseDir + folderPath, file);
@@ -223,7 +226,7 @@ class TemplateSevice extends Service {
     let ctx = this.ctx;
     let pageSize = 10;
     let total = await ctx.model.Template.countDocuments({});
-    let list = await ctx.model.Template.find({},"imgs name")
+    let list = await ctx.model.Template.find({},"_id imgs name tags")
       .sort({ create_time: -1 })
       .skip((page - 1) * pageSize)
       .limit(pageSize);

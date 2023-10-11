@@ -16,7 +16,7 @@
               选择一个你喜欢的写真模板，出片风格会与此模板相似
             </div>
             <div class="py-4 -mx-6 px-6">
-              <templates class=""></templates>
+              <templates class="" @select="selectTemplates" ></templates>
             </div>
           </div>
           <!-- 2.制作数字分身 -->
@@ -47,7 +47,7 @@
     <lpopup v-model="template.show" v-if="step_index == 0" class="">
       <div class="flex flex-col h-full">
         <div class="pb-6 pt-2 px-6 overflow-y-auto flex-1">
-          <template-detail></template-detail>
+          <template-detail :id="template._id" v-if="template.show"></template-detail>
         </div>
         <div class="h-20 w-full px-6 py-2 translate-y-1">
           <lbutton class="shadow-xl">使用此模板</lbutton>
@@ -71,17 +71,27 @@ import addDoppelganger from "../components/addDoppelganger.vue";
 export default {
   data() {
     return {
-      step_index: 2,
+      step_index: 1,
       template: {
         _id: "",
-        show: true,
+        show: false,
       },
+
+      subdata:{
+        select_template_id:"",
+        select_doppelganger_id:"",
+      }
+
     };
   },
   onLoad() {},
   methods: {
     switchStep: function (index) {
       this.step_index = index;
+    },
+    selectTemplates(id){
+      this.template._id = id;
+      this.template.show = true;
     },
   },
   components: {

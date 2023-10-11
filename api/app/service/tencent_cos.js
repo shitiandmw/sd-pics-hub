@@ -1,16 +1,93 @@
-const { Service } = require('egg');
-const STS = require('qcloud-cos-sts');
-var COS = require('cos-nodejs-sdk-v5');
-const path = require('path');
+const { Service } = require("egg");
+const STS = require("qcloud-cos-sts");
+var COS = require("cos-nodejs-sdk-v5");
+const crypto = require("crypto");
+const path = require("path");
 
 class TencentCosSevice extends Service {
+  /**
+   * 获得用户上传分身原始照片的token
+   * @param {*} userid
+   */
+  async getUniDoppelgangerUploadInfo(userid, ext = "png") {
+    let path = `/r/doppelganger/${userid}/`;
+    return await this.getUniUploadInfo(path, ext);
+  }
+  /**
+   * 用于uniapp上传cos的参数
+   * @param {*} path 
+   * @param {*} ext 
+   * @returns 
+   */
+  async getUniUploadInfo(path, ext = "png") {
+    let { app } = this.ctx;
+    // 判断path最后一个字符是不是 /，如果是，删除它
+    if (path.substr(path.length - 1, 1) == "/") 
+      path = path.substr(0, path.length - 1);
+    let token = await this.getToken(path);
+    if (!token) throw this.ctx.ltool.err("获得临时token失败", 20011);
+
+    // 配置参数
+    var config = {
+      // 获取腾讯云密钥，建议使用限定权限的子用户的密钥 https://console.cloud.tencent.com/cam/capi
+      secretId: token.credentials.tmpSecretId,
+      secretKey: token.credentials.tmpSecretKey,
+      securityToken: token.credentials.sessionToken,
+      // 这里填写存储桶、地域，例如：test-1250000000、ap-guangzhou
+      bucket: app.config.tencent.cos.bucket,
+      region: app.config.tencent.cos.region,
+      // 限制的上传后缀
+      extWhiteList: ["jpg", "jpeg", "png", "gif", "bmp"],
+    };
+    var cosHost = `${config.bucket}.cos.${config.region}.myqcloud.com`;
+    var cosKey = path + '/'+ this.ctx.ltool.uuid() + "." + ext;
+    var now = Math.round(Date.now() / 1000);
+    var exp = now + 900;
+    var qKeyTime = now + ";" + exp;
+    var qSignAlgorithm = "sha1";
+    // 生成上传要用的 policy
+    // PostObject 签名保护文档 https://cloud.tencent.com/document/product/436/14690#.E7.AD.BE.E5.90.8D.E4.BF.9D.E6.8A.A4
+    var policy = JSON.stringify({
+      expiration: new Date(exp * 1000).toISOString(),
+      conditions: [
+        // {'acl': query.ACL},
+        // ['starts-with', '$Content-Type', 'image/'],
+        // ['starts-with', '$success_action_redirect', redirectUrl],
+        // ['eq', '$x-cos-server-side-encryption', 'AES256'],
+        { "q-sign-algorithm": qSignAlgorithm },
+        { "q-ak": config.secretId },
+        { "q-sign-time": qKeyTime },
+        { bucket: config.bucket },
+        { key: cosKey },
+      ],
+    });
+     // 步骤一：生成 SignKey
+     var signKey = crypto.createHmac('sha1', config.secretKey).update(qKeyTime).digest('hex');
+
+     // 步骤二：生成 StringToSign
+     var stringToSign = crypto.createHash('sha1').update(policy).digest('hex');
+ 
+     // 步骤三：生成 Signature
+     var qSignature = crypto.createHmac('sha1', signKey).update(stringToSign).digest('hex');
+
+     return {
+      cosHost: cosHost,
+      cosKey: cosKey,
+      policy: Buffer.from(policy).toString('base64'),
+      qSignAlgorithm: qSignAlgorithm,
+      qAk: config.secretId,
+      qKeyTime: qKeyTime,
+      qSignature: qSignature,
+      securityToken: config.securityToken
+     };
+  }
   /**
    * 获得相关路径的临时token
    * @param {*} path 授权上传路径前缀
    * @returns
    */
   async getToken(path, durationSeconds = 1800) {
-    let cacheKey = 'tencent_cos_token_' + this.ctx.ltool.md5(path || '');
+    let cacheKey = "tencent_cos_token_" + this.ctx.ltool.md5(path || "");
     let { app } = this.ctx;
     let token = await app.redis.sGet(
       cacheKey,
@@ -30,7 +107,7 @@ class TencentCosSevice extends Service {
                   // roleArn: 'qcs::cam::uin/12345678:roleName/testRoleName', // 文档指引：https://cloud.tencent.com/document/product/1312/48197
                 },
                 function (err, credential) {
-                  console.log(JSON.stringify(policy, null, '    '));
+                  console.log(JSON.stringify(policy, null, "    "));
                   console.log(err || credential);
                   if (err) reject(err);
                   else resolve(credential);
@@ -39,13 +116,13 @@ class TencentCosSevice extends Service {
             });
           };
           if (!app.config.tencent || !app.config.tencent.cos)
-            throw this.ctx.ltool.err('腾讯云配置获取失败', 10011);
+            throw this.ctx.ltool.err("腾讯云配置获取失败", 10011);
           // 配置参数
           var config = {
             secretId: app.config.tencent.SecretId, // 固定密钥
             secretKey: app.config.tencent.SecretKey, // 固定密钥
-            proxy: '',
-            host: 'sts.tencentcloudapi.com', // 域名，非必须，默认为 sts.tencentcloudapi.com
+            proxy: "",
+            host: "sts.tencentcloudapi.com", // 域名，非必须，默认为 sts.tencentcloudapi.com
             // endpoint: 'sts.internal.tencentcloudapi.com', // 域名，非必须，与host二选一，默认为 sts.tencentcloudapi.com
             durationSeconds: durationSeconds, // 密钥有效期
             // 放行判断相关参数
@@ -54,23 +131,23 @@ class TencentCosSevice extends Service {
             allowPrefix: path, // 这里改成允许的路径前缀，可以根据自己网站的用户登录态判断允许上传的具体路径，例子： a.jpg 或者 a/* 或者 * (使用通配符*存在重大安全风险, 请谨慎评估使用)
           };
 
-          var appId = config.bucket.substr(1 + config.bucket.lastIndexOf('-'));
+          var appId = config.bucket.substr(1 + config.bucket.lastIndexOf("-"));
           var policy = {
-            version: '2.0',
+            version: "2.0",
             statement: [
               {
                 action: [
                   // 简单上传
-                  'name/cos:PutObject',
-                  'name/cos:PostObject',
+                  "name/cos:PutObject",
+                  "name/cos:PostObject",
                   // 分片上传
-                  'name/cos:InitiateMultipartUpload',
-                  'name/cos:ListMultipartUploads',
-                  'name/cos:ListParts',
-                  'name/cos:UploadPart',
-                  'name/cos:CompleteMultipartUpload',
+                  "name/cos:InitiateMultipartUpload",
+                  "name/cos:ListMultipartUploads",
+                  "name/cos:ListParts",
+                  "name/cos:UploadPart",
+                  "name/cos:CompleteMultipartUpload",
                 ],
-                effect: 'allow',
+                effect: "allow",
                 // principal: { qcs: ['*'] },
                 resource: [
                   `qcs::cos:${config.region}:uid/${appId}:${config.bucket}${path}`,
@@ -88,7 +165,7 @@ class TencentCosSevice extends Service {
           };
           return await _getToken(config, policy);
         } catch (error) {
-          throw this.ctx.ltool.err('获得临时token失败，错误：' + error, 10012);
+          throw this.ctx.ltool.err("获得临时token失败，错误：" + error, 10012);
         }
       },
       durationSeconds - 600
@@ -96,6 +173,7 @@ class TencentCosSevice extends Service {
     if (!token || !token.credentials || !token.credentials.sessionToken) {
       await app.redis.del(cacheKey);
     }
+    // console.log("token", token);
     return token;
   }
 
@@ -108,13 +186,13 @@ class TencentCosSevice extends Service {
   async uploadImage(sys_path, cos_path, width, height, quality) {
     if (width || height) {
       // 临时压缩目录 \\tmp\\compress\\YYYYmmdd
-      let compress_path = this.app.baseDir + `\\tmp\\compress`;
-      let day = this.ctx.ltool.formatTime2(new Date().valueOf(), 'YYYYMMDD');
+      let compress_path = this.app.baseDir + `${path.sep}tmp${path.sep}compress`;
+      let day = this.ctx.ltool.formatTime2(new Date().valueOf(), "YYYYMMDD");
       // 删除临时压缩目录下所有不是以 day 命名的文件夹
       await this.ctx.ltool.deleteDir(compress_path, day);
 
       // 从info.imgs[i]中获得后缀名
-      let ext = path.basename(sys_path).split('.').pop();
+      let ext = path.basename(sys_path).split(".").pop();
 
       compress_path = `${compress_path}\\${day}\\${this.ctx.ltool.uuid()}.${ext}`;
 
@@ -127,7 +205,7 @@ class TencentCosSevice extends Service {
         quality
       );
 
-      if (!compress_res) throw this.ctx.ltool.err('图片压缩失败', 10012);
+      if (!compress_res) throw this.ctx.ltool.err("图片压缩失败", 10012);
       sys_path = compress_path;
     }
     // 上传图片
@@ -141,9 +219,10 @@ class TencentCosSevice extends Service {
    * @returns 对象云存储的路径名
    */
   async uploadFile(path, cos_path) {
-    let cos_path_dir = cos_path.substr(0, cos_path.lastIndexOf('/'));
+    let cos_path_dir = cos_path.substr(0, cos_path.lastIndexOf("/"));
     let token = await this.getToken(cos_path_dir);
-    if (!token) throw this.ctx.ltool.err('获得临时token失败', 10012);
+    if (!token) throw this.ctx.ltool.err("获得临时token失败", 10012);
+    // console.log("************token***********", token);
     let { app } = this.ctx;
     var cos = new COS({
       getAuthorization: function (options, callback) {
@@ -158,7 +237,7 @@ class TencentCosSevice extends Service {
     });
 
     if (!app.config.tencent || !app.config.tencent.cos)
-      throw this.ctx.ltool.err('腾讯云配置获取失败', 10011);
+      throw this.ctx.ltool.err("腾讯云配置获取失败", 10011);
     let result = await new Promise((resolve, reject) => {
       let upload_config = {
         Bucket:

@@ -8,9 +8,9 @@
                 <image class="w-18 h-18 rounded-md"  :src="user.avatar" alt="">
                 <div class="flex-1 ml-6">
                     <div class="text-2xl">{{user.nick_name}}</div>
-                    <div class="text-lg h-10 flex items-center text-gray-500">联系号码：{{user.contact_num}}</div>
+                    <!-- <div class="text-lg h-10 flex items-center text-gray-500">联系号码：{{user.contact_num}}</div> -->
                 </div>
-                <image class="w-5 h-5" src="/static/icon/icon-right.png" alt="">
+                <!-- <image class="w-5 h-5" src="/static/icon/icon-right.png" alt=""> -->
             </div>
 
             <div class="h-14 flex items-center px-6 space-x-6 mt-2 bg-white">
