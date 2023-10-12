@@ -1,47 +1,74 @@
 <template>
   <phone-container class="flex h-full flex-col">
     <head-bar></head-bar>
-		<div class="head-util px-4">
-			<!-- <div class="w-7 h-7" @tap="back"></div> -->
+    <div class="head-util px-4">
+      <!-- <div class="w-7 h-7" @tap="back"></div> -->
       <div class="flex-1 text-center">我的照片库</div>
-      <div class="w-5 h-5 box-content p-2 pr-0 cursor-pointer" @tap="addTask" ><svgAddTask></svgAddTask></div>
-		</div>
-    <div class="flex-1 overflow-hidden">
-      <template v-if="list!=null">
+      <div
+        class="w-5 h-5 box-content p-2 pr-0 cursor-pointer text-gray-500"
+        @tap="addTask"
+      >
+        <svgAddTask></svgAddTask>
+      </div>
+    </div>
+
+    <div
+      class="flex-1 flex flex-col items-center space-y-4"
+      v-if="firstload && (list == null || list.length <= 0)"
+    >
+      <div class="w-18 h-18 text-gray-300 mt-20"><svgNoData></svgNoData></div>
+      <div>还没有创建过任何任务，这里空空如也~</div>
+      <lbutton class="w-52 h-12 text-base" @tap="addTask"
+        ><div class="w-5 h-5 text-white mr-1"><svgAddTask></svgAddTask></div>
+        去创建一个写真</lbutton
+      >
+    </div>
+    <div class="flex-1 overflow-hidden" v-if="list != null && list.length>0">
+      <template>
         <scroll-view class="h-full" scroll-y="true">
           <div
-            class="border-b-px border-b-gray-100 py-4 bg-white space-y-1 px-4"
-            v-for="(item, index) in 5"
+            class="border-b-px border-b-gray-100 py-4 space-y-1 px-4"
+            v-for="(item, index) in list"
             :key="'k' + index"
           >
-            <div class="text-xl h-8 text-stone-800">古风写真</div>
+            <div class="text-lg h-8 text-stone-800">
+              {{item.type_name}}
+              <template v-if="item.type == 2">
+                - {{ item.params.template.name}}
+              </template>
+            </div>
             <div
               class="group grid gap-2"
               :class="
-                item % 2 == 0
+                item.result.length % 2 == 0
                   ? 'grid-cols-2 hw w-50'
-                  : item % 3 == 0 || item > 4
+                  : item.result.length % 3 == 0 || item.result.length > 4
                   ? 'grid-cols-3 hw w-76'
-                  : 'grid-cols-1 w-42'
+                  : 'grid-cols-1 hd w-42'
               "
             >
-              <image
-                v-for="(img, img_index) in item"
-                :key="'i' + img_index"
-                class="w-full group-[.hw]:h-24"
-                :mode="item > 1 ? 'aspectFill' : 'widthFix'"
-                src="https://file-1305732628.cos.ap-guangzhou.myqcloud.com/r/doppelganger/141151515/compress/f4.png"
-                alt=""
-              />
+              <template v-for="(img, img_index) in item.result">
+                <whatImg class="w-full group-[.hw]:h-24 group-[.d]:h-56" v-if="img=='whatimg'" :key="'wi' + img_index"></whatImg>
+                <image v-else
+                  :key="'i' + img_index"
+                  class="w-full group-[.hw]:h-24"
+                  :mode="item > 1 ? 'aspectFill' : 'widthFix'"
+                  src="https://file-1305732628.cos.ap-guangzhou.myqcloud.com/r/doppelganger/141151515/compress/f4.png"
+                  alt=""
+                />
+              </template>
+             
             </div>
             <div class="text-sm text-blue-600 flex items-center space-x-1">
-              <span>任务排队中，当前第111位</span>
+              <span  v-if="item.status == 0">任务排队中，当前第{{item.rank}}位</span>
+              <span  v-if="item.status == 1">任务正在执行，请稍等</span>
+              <span  v-if="item.status == 3">任务正在进入排队</span>
               <div class="w-4 text-blue-500 overflow-hidden">
                 <svg-more class="animate-popup3"></svg-more>
               </div>
             </div>
             <div class="flex h-6 items-center justify-between">
-              <div class="text-sm text-gray-400">1小时前</div>
+              <div class="text-sm text-gray-400">{{item.create_time_format}}</div>
               <div class="bg-gray-200 px-2 rounded w-9 h-5">
                 <svg-more></svg-more>
               </div>
@@ -55,39 +82,51 @@
 </template>
 
 <script>
+import lbutton from "@/components/button.vue";
 import svgUser from "@/components/svg/svg-user.vue";
 import svgMore from "@/components/svg/svg-more.vue";
+import svgNoData from "@/components/svg/svg-nodata.vue";
 import svgAddTask from "@/components/svg/svg-addtask.vue";
+import whatImg from "@/components/what-img.vue";
 export default {
   data() {
     return {
-      firstload:false,
+      firstload: false,
       list: null,
-      error:"",
+      error: "",
     };
   },
-  async onLoad() {
+  // async onLoad() {
+  //   await this.getList();
+  // },
+  async onShow(){
     await this.getList();
   },
   methods: {
     async getList() {
-      const url = "/task/list";
-      const params = {};
-      const res = await this.$http.get(url, params,2);
-      console.log("res",res)
-      if (res && res.code == 1) {
-        this.list = res.data.list;
-        console.log("list",this.list)
+      let that = this;
+      try {
+        const url = "/task/list";
+        const params = {};
+        const res = await this.$http.get(url, params, 2);
+        console.log("res", res);
+        if (res && res.code == 1) {
+          this.list = res.data;
+          console.log("list", this.list);
+        } else this.error = res.message;
+      } catch (error) {
+        this.error = error.message;
+      } finally {
+        that.firstload = true;
       }
-      else this.error = res.message;
     },
-    addTask(){
-        uni.navigateTo({
+    addTask() {
+      uni.navigateTo({
         url: "/pages/guide/step",
       });
-    }
+    },
   },
-  components: { svgMore,svgUser ,svgAddTask},
+  components: { svgMore, svgUser, svgAddTask, svgNoData, lbutton ,whatImg },
 };
 </script>
 

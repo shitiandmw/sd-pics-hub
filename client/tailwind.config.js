@@ -28,9 +28,11 @@ module.exports = {
         },
       },
       colors: {
+        bg:'#F5F9FF',
         bc: '#82ebeb',
         ec: '#f7b2a2',
-        primary: '#3b82f6',
+        primary: '#2969FF',
+        primary2: '#3b82f6',
         accent: '#8BC34A',
       },
       borderWidth: {

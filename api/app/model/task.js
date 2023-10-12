@@ -20,13 +20,13 @@ module.exports = app => {
     // 任务参数
     params: { type: Object },
     // 任务创建时间
-    create_time: { type: Number },
+    create_time: { type: Number ,default:0},
     // 任务开始时间
-    start_time: { type: Number },
+    start_time: { type: Number ,default:0},
     // 任务结束时间
-    end_time: { type: Number },
+    end_time: { type: Number ,default:0},
     // 任务执行者
-    executor: { type: String },
+    executor: { type: String ,default:''},
     // 任务执行结果 (图片)
     result: [
       {
@@ -39,9 +39,9 @@ module.exports = app => {
       },
     ],
     // 任务执行结果备注
-    result_remark: { type: String },
+    result_remark: { type: String ,default:''},
     // 任务排名 （获取数据的时候从redis中获取）
-    rank: { type: Number },
+    rank: { type: Number , default:  999 },
   });
 
   let schema = mongoose.model('Task', TaskSchema);

@@ -8,7 +8,7 @@
       ></steps>
       <div class="flex-1" :class="step_index == 0 ? 'overflow-hidden' : ''">
         <!-- 1.选择模板 -->
-        <scroll-view class="h-full" scroll-y="true" v-if="step_index == 0">
+        <scroll-view class="h-full" scroll-y="true" v-show="step_index == 0">
           <div class="">
             <div class="mt-8 text-2xl mb-1">写真模板</div>
             <div class="text-base text-gray-500 mb-2">
@@ -21,17 +21,19 @@
         </scroll-view>
 
         <!-- 2.制作数字分身 -->
-        <div v-if="step_index == 1">
+        <div v-show="step_index == 1">
           <div class="mt-8 text-2xl mb-1">制作数字分身</div>
           <div class="text-base text-gray-500 mb-6">
             制作一个你的数字分身，用于代替你在虚拟世界拍摄写真
           </div>
-          <addDoppelganger></addDoppelganger>
+          <addDoppelganger
+            @success="createDoppelgangerSuccess"
+          ></addDoppelganger>
           <div class="h-10"></div>
         </div>
 
         <!-- 3.完成 -->
-        <div v-if="step_index == 2">
+        <div v-show="step_index == 2">
           <!-- <div class="mt-32 mb-10 flex items-center justify-center">
             <div class="w-24 h-24 text-green-500">
               <svgSuccess></svgSuccess>
@@ -52,9 +54,14 @@
               </div>
             </div>
           </div>
-          <div class="flex  mt-14 space-x-4">
-            <lbutton class="flex-1 h-10 rounded-full text-base">查看任务状态</lbutton>
-            <lbutton class="border h-10 w-24 rounded-full text-base bg-gray-50 text-gray-600 ">去首页</lbutton>
+          <div class="flex mt-14 space-x-4">
+            <lbutton class="flex-1 h-10 rounded-full text-base"  @tap="goTasks"
+              >查看任务状态</lbutton
+            >
+            <lbutton
+              class="border h-10 w-24 rounded-full text-base bg-gray-50 text-gray-600"  @tap="goHome"
+              >去首页</lbutton
+            >
           </div>
         </div>
       </div>
@@ -68,7 +75,7 @@
           ></template-detail>
         </div>
         <div class="h-20 w-full px-6 py-2 translate-y-1">
-          <lbutton class="shadow-xl">使用此模板</lbutton>
+          <lbutton class="shadow-xl" @tap="enterSelect">使用此模板</lbutton>
         </div>
       </div>
     </lpopup>
@@ -89,7 +96,7 @@ import addDoppelganger from "../components/addDoppelganger.vue";
 export default {
   data() {
     return {
-      step_index: 2,
+      step_index: 0,
       template: {
         _id: "",
         show: false,
@@ -97,13 +104,13 @@ export default {
 
       subdata: {
         select_template_id: "",
-        select_doppelganger_id: "",
+        select_doopelganger_id: "",
       },
 
       sub_result: {
         success: false,
         error: "",
-        data: {},
+        data: "",
       },
     };
   },
@@ -115,6 +122,53 @@ export default {
     selectTemplates(id) {
       this.template._id = id;
       this.template.show = true;
+    },
+    enterSelect() {
+      this.subdata.select_template_id = this.template._id;
+      this.template.show = false;
+      this.step_index = 1;
+    },
+    // 创建数字分身成功
+    async createDoppelgangerSuccess(doopelganger_id) {
+      let that = this;
+      try {
+        // 判断数据
+        if (!doopelganger_id) throw new Error("请先提交数字分身");
+        if (!that.subdata.select_template_id)
+          throw new Error("请先选择写真模板");
+        that.subdata.select_doopelganger_id = doopelganger_id;
+        // 创建任务
+        let url = "/task/generate_portrait";
+        let params = {
+          template_id: that.subdata.select_template_id,
+          doopelganger_id: that.subdata.select_doopelganger_id,
+        };
+        const res = await this.$http.post(url, params, 2);
+        if (res.code != 1) throw new Error(res.message);
+        that.sub_result.success = true;
+        that.sub_result.sub_result = res.data;
+
+        this.step_index = 2;
+      } catch (error) {
+        uni.showToast({
+          title: error.message,
+          icon: "error",
+          duration: 4000,
+        });
+      }
+    },
+
+    // 去首页
+    goHome() {
+      uni.switchTab({
+        url: "/pages/tab/templates",
+      });
+    },
+    // 任务列表
+    goTasks() {
+      uni.switchTab({
+        url: "/pages/tab/tasks",
+      });
     },
   },
   components: {

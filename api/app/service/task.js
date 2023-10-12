@@ -18,17 +18,17 @@ class TaskSevice extends Service {
     let template = await this.ctx.service.template.detail(template_id);
     if (!template) throw ctx.ltool.err('模板不存在', 10001);
 
-    // 每个人暂时只能有一个正在执行的同类型任务
-    let task_count = await this.ctx.model.Task.count({
-      user_id: user_id,
-      type: 2,
-      status: { $nin: [2, 4] },
-    });
-    if (task_count >= 1)
-      throw ctx.ltool.err(
-        '您有一个写真任务正在进行，请等待任务完成后再创建新的任务',
-        10002
-      );
+    // // 每个人暂时只能有一个正在执行的同类型任务
+    // let task_count = await this.ctx.model.Task.count({
+    //   user_id: user_id,
+    //   type: 2,
+    //   status: { $nin: [2, 4] },
+    // });
+    // if (task_count >= 1)
+    //   throw ctx.ltool.err(
+    //     '您有一个写真任务正在进行，请等待任务完成后再创建新的任务',
+    //     10002
+    //   );
 
     // 验证数字分身是否属于当前用户
     let doopelganger = await this.ctx.model.Doppelganger.findOne({
@@ -91,13 +91,16 @@ class TaskSevice extends Service {
     if (!task_info || !task_info._id || !task_info.type)
       throw this.ctx.ltool.err('任务信息不完整', 20001);
 
-    let index = app.redis.lpos(
+    let index = await app.redis.lpos(
       'task_queue_' + task_info.type,
       task_info._id.toString()
     );
+    console.log("rank index",index)
 
     if (typeof index == 'undefined' || index == null) return -1;
-    return app.redis.llen('task_queue_' + task_info.type) - index;
+    let queue_len = await app.redis.llen('task_queue_' + task_info.type);
+    console.log("rank queue_len",queue_len)
+    return queue_len - index;
   }
 
   /**
@@ -219,16 +222,40 @@ class TaskSevice extends Service {
   async getMyList(user_id, page = 1, page_size = 10 ) {
     const { app, ctx } = this;
     // 获得我的任务列表
-    let list = await ctx.model.Task.find({ user_id: user_id },"name first_img type status create_time result rank").sort({create_time:-1}).skip((page-1)*page_size).limit(page_size);
+    let list = await ctx.model.Task.find({ user_id: user_id },"name first_img type status create_time result rank params").sort({create_time:-1}).skip((page-1)*page_size).limit(page_size);
     if(!list) return [];
+    let res_list=[];
     // 获得任务排名
     for (let i = 0; i < list.length; i++) {
-      let task = list[i];
-      task.rank = await this.getTaskRanking(task);
+      let item = list[i].toJSON();
+      let rank =  await this.getTaskRanking(item);
+      console.log("rank",rank)
+      item.rank = rank;
+      delete item.params.template.params;
+      item.type_name = this.getTaskTypeName(item.type);
+      item.create_time_format = ctx.ltool.formatTime(item.create_time,2);
+      if(item.type == 2 && item.status != 2){
+        item.result = [
+          "whatimg",
+          "whatimg",
+          "whatimg"
+        ]
+      }
+      res_list.push(item);
     }
-    return list;
+    return res_list;
   }
 
+  getTaskTypeName(type){
+    switch (type) {
+      case 1:
+        return "训练数字分身";
+      case 2:
+        return "生成写真";
+      case 3:
+        return "图片精修";
+    }
+  }
   /**
    * 保存任务token和任务信息的对应关系
    * @param {*} task_info

@@ -1,16 +1,16 @@
 <template>
-  <phone-container class="flex h-full flex-col bg-white">
+  <phone-container class="flex h-full flex-col">
     <head-bar></head-bar>
     <div class="head-util px-4">
-      <div class="flex-1 text-center">圆梦照相馆，想你所想</div>
+      <div class="flex-1 text-center">写真模板</div>
       <div class="w-5 h-5 box-content p-2 pr-0"><svgHelp></svgHelp></div>
     </div>
     <div class="flex-1 overflow-hidden">
       <scroll-view class="h-full px-6" scroll-y="true">
-        <div class="mt-4 text-2xl mb-1">写真模板</div>
+        <!-- <div class="mt-4 text-2xl mb-1">写真模板</div>
         <div class="text-base text-gray-500 mb-2">
           选择一个你喜欢的写真模板，出片风格会与此模板相似
-        </div>
+        </div> -->
         <div class="pt-4 pb-8"><templates @select="selectTemplates" ></templates></div>
       </scroll-view>
     </div>
@@ -20,7 +20,7 @@
           <template-detail :id="template.id" v-if="template.show"></template-detail>
         </div>
         <div class="h-20 w-full px-6 py-2 translate-y-1">
-          <lbutton class="shadow-xl">使用此模板</lbutton>
+          <lbutton class="shadow-xl">使用此模板创建写真</lbutton>
         </div>
       </div>
     </lpopup>

@@ -1,6 +1,7 @@
 <template>
   <div
-    class="h-18 w-full border-t border-gray-100 bg-gray-50 shadow flex items-center justify-between px-5"
+    class="h-16 w-full rounded-t-2xl bg-white flex items-center justify-between px-5"
+    style="box-shadow: 50px 25px 0px -12px rgb(0 0 0 / 0.9);"
   >
     <div
       class="group w-16 flex flex-col items-center text-xs text-gray-500"
@@ -9,7 +10,7 @@
       :key="'tab' + index"
       @tap="switchTab(index)"
     >
-      <div class="w-7 h-7 mb-1">
+      <div class="w-6 h-6 mb-1">
         <svgTemplates v-if="item.name == 'templates'" />
         <svgImgs v-if="item.name == 'imgs'" />
         <svgMy v-if="item.name == 'my'" />

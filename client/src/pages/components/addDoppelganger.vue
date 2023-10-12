@@ -124,6 +124,7 @@ export default {
       img_status: "",
       loading: false,
       loadtext: "",
+      subres: "",
     };
   },
   async mounted() {},
@@ -160,6 +161,7 @@ export default {
       this.img = [];
       this.img_file = [];
       this.upload_paths = [];
+      this.subres = "";
     },
     selectType(type) {
       if (type == 2)
@@ -169,65 +171,6 @@ export default {
         });
       else this.type = type;
     },
-    // 上传所有选中图片
-    async submitImgs() {
-      let that = this;
-      if (!that.img || that.img.length <= 0) {
-        throw new Error("未选中图片");
-      }
-      if (that.upload_paths && that.upload_paths.length > 0)
-        return that.upload_paths;
-      else {
-        let upload_paths = [];
-        that.img_status = `0/${that.img.length}`;
-        for (let i = 0; i < that.img.length; i++) {
-          var file = that.img_file[i];
-          var fileName = file.name;
-          var lastIndex = fileName.lastIndexOf(".");
-          var extName = lastIndex > -1 ? fileName.slice(lastIndex + 1) : "";
-
-          let upload_path = await that.uploadFile(that.img[i], extName);
-          upload_paths.push(upload_path);
-          that.img_status = `${i + 1}/${that.img.length}`;
-        }
-        that.img_status = ``;
-        console.log("upload_paths", upload_paths);
-        that.upload_paths = upload_paths;
-        return upload_paths;
-      }
-    },
-    // 提交数据
-    async submitData() {
-      let that = this;
-      try {
-        // 判断数据
-        if (!that.type) throw new Error("请先选择模式");
-        if (!that.img || that.img.length <= 0) throw new Error("请先选择照片");
-        that.loading = true;
-        that.loadtext = `正在上传照片`;
-        // 1、上传图片
-        let upload_imgs = await this.submitImgs();
-        that.loadtext = `正在提交数据`;
-        // 2、上传数据
-        const url = "/doppelganger/create";
-        const params = { type: that.type, train_imgs: upload_imgs };
-        const res = await this.$http.post(url, params, 2);
-        that.loading = false;
-        if (res.code != 1) throw new Error(res.message);
-        that.loadtext = `创建成功`;
-        this.$emit("success");
-      } catch (error) {
-        that.loading = false;
-        that.loadtext = ``;
-        uni.showToast({
-          title: error.message,
-          icon: "error",
-          duration: 4000,
-        });
-        this.$emit("fail", error.message);
-      }
-    },
-
     // 获得cos临时上传凭证
     async getCosUploadInfo(ext = "png") {
       const url = "/doppelganger/getcostoken";
@@ -268,9 +211,11 @@ export default {
             //     .camSafeUrlEncode(opt.cosKey)
             //     .replace(/%2F/g, "/")}`
             // );
-            console.log("opt.cosKey",opt.cosKey)
-            let format_cosKey = that.camSafeUrlEncode(opt.cosKey).replace(/%2F/g, "/")
-            console.log("format_cosKey",format_cosKey)
+            console.log("opt.cosKey", opt.cosKey);
+            let format_cosKey = that
+              .camSafeUrlEncode(opt.cosKey)
+              .replace(/%2F/g, "/");
+            console.log("format_cosKey", format_cosKey);
             resolve(format_cosKey);
           },
           error(err) {
@@ -288,6 +233,70 @@ export default {
         .replace(/\(/g, "%28")
         .replace(/\)/g, "%29")
         .replace(/\*/g, "%2A");
+    },
+
+
+    // 上传所有选中图片
+    async submitImgs() {
+      let that = this;
+      if (!that.img || that.img.length <= 0) {
+        throw new Error("未选中图片");
+      }
+      if (that.upload_paths && that.upload_paths.length > 0)
+        return that.upload_paths;
+      else {
+        let upload_paths = [];
+        that.img_status = `0/${that.img.length}`;
+        for (let i = 0; i < that.img.length; i++) {
+          var file = that.img_file[i];
+          var fileName = file.name;
+          var lastIndex = fileName.lastIndexOf(".");
+          var extName = lastIndex > -1 ? fileName.slice(lastIndex + 1) : "";
+
+          let upload_path = await that.uploadFile(that.img[i], extName);
+          upload_paths.push(upload_path);
+          that.img_status = `${i + 1}/${that.img.length}`;
+        }
+        that.img_status = ``;
+        console.log("upload_paths", upload_paths);
+        that.upload_paths = upload_paths;
+        return upload_paths;
+      }
+    },
+    // 提交数据
+    async submitData() {
+      let that = this;
+      try {
+        // 判断数据
+        if (!that.type) throw new Error("请先选择模式");
+        if (!that.img || that.img.length <= 0) throw new Error("请先选择照片");
+        that.loadtext = `正在提交数据`;
+        if (!that.subres) {
+          that.loading = true;
+          that.loadtext = `正在上传照片`;
+          // 1、上传图片
+          let upload_imgs = await this.submitImgs();
+          that.loadtext = `正在提交数据`;
+          // 2、上传数据
+          const url = "/doppelganger/create";
+          const params = { type: that.type, train_imgs: upload_imgs };
+          const res = await this.$http.post(url, params, 2);
+          if (res.code != 1) throw new Error(res.message);
+          that.subres = res.data;
+        }
+        await this.$emit("success", that.subres);
+        that.loadtext = `创建成功`;
+        that.loading = false;
+      } catch (error) {
+        that.loading = false;
+        that.loadtext = ``;
+        uni.showToast({
+          title: error.message,
+          icon: "error",
+          duration: 4000,
+        });
+        this.$emit("fail", error.message);
+      }
     },
   },
   computed: {},
