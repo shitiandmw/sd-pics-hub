@@ -3,6 +3,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const moment = require('moment');
 const Crypto = require('crypto');
+const path = require('path');
 
 exports.compressImg = async function (
   img_path,
@@ -44,7 +45,7 @@ exports.deleteDir = async function (directory, ignore) {
     let files = fs.readdirSync(directory);
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
-      const filePath = `${directory}\\${file}`;
+      const filePath = `${directory}${path.sep}${file}`;
       const fileStat = fs.statSync(filePath);
       if (fileStat.isDirectory() && file != ignore) {
         await rimraf(filePath);

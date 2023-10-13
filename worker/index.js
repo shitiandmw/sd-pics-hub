@@ -29,6 +29,7 @@ const path = require('path');
 // 状态  0: 空闲 1: 已发布任务 2: 已接受任务 3: 工作中 4: 任务完成正在上传结果
 let worker_state = 0;
 let worker_thread = null;
+const ll = path.sep;
 
 /**
  * 读取配置信息
@@ -303,16 +304,16 @@ async function doTask2(task_info) {
         // 上传结果
         if (task_result.code && task_result.code == 1) {
           // 保存图片到临时目录
-          let compress_path = __dirname + `\\tmp\\result`;
+          let compress_path = __dirname + `${ll}tmp${ll}result`;
           let day = ltool.formatTime2(new Date().valueOf(), 'YYYYMMDD');
           // 删除临时压缩目录下非当天的文件夹
           await ltool.deleteDir(compress_path, day);
           for (let index = 0; index < task_result.data.length; index++) {
             const element = task_result.data[index];
             let filename = ltool.uuid() + '.png';
-            let filepath = `${compress_path}\\${day}\\${filename}`;
-            if (!fs.existsSync(`${compress_path}\\${day}`))
-              fs.mkdirSync(`${compress_path}\\${day}`, { recursive: true });
+            let filepath = `${compress_path}${ll}${day}${ll}${filename}`;
+            if (!fs.existsSync(`${compress_path}${ll}${day}`))
+              fs.mkdirSync(`${compress_path}${ll}${day}`, { recursive: true });
             fs.writeFileSync(filepath, base64.toByteArray(element));
             task_result.data[index] = filepath;
           }

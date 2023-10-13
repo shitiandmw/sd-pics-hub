@@ -23,6 +23,7 @@ module.exports = app => {
   /**---------------- 任务相关 ----------------**/
   router.post('/task/generate_portrait', controller.task.generatePortrait); // 创建任务写真任务
   router.get('/task/list', controller.task.getList);  // 查看任务列表
+  router.post('/task/del', controller.task.del);  // 删除任务
   // router.get('/task/info', controller.task.getInfo);  // 查看任务详情
 
   /**---------------- cos相关 ----------------**/

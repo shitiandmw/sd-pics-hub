@@ -48,19 +48,21 @@ class NspController extends Controller {
         let data_key_changed = !data_old || data_old.data_key != data_key;
 
         console.log(
-          `[${socket_id}]workerState`,
+          `[${socket_id}${(new Date()).valueOf()}]workerState`,
           data_key_changed ? data : 'no update'
         );
 
         // 如果上次的状态是发布任务，需要锁定状态，在工人回复接收或工作中之前，不能再次发布任务
         if (data_old && data_old.data.state == 1 && data.state < 1)
           data.state = 1;
+        await app.redis.sSet(cache_key, { data_key: data_key, data: data },300)
         // 更新工人状态信息到数据库
         let work_info = await ctx.service.worker.updateWorkerState(
           socket_id,
           data
         );
-
+        console.log(`work_info:${work_info!=null};data.state:${data.state};data.memory_info:${data.memory_info != '{}'}` )
+        
         // 如果是空闲状态，尝试取任务
         if (data.state == 0 && work_info && data.memory_info != '{}') {
           for (let i = 0; i < work_info.task_types.length; i++) {
@@ -84,18 +86,12 @@ class NspController extends Controller {
               });
               break;
             }
+            else console.log("no task")
           }
 
-          // 记录上次更新信息到缓存
-          app.redis.sSet(
-            cache_key,
-            {
-              data_key: data_key,
-              data: data,
-            },
-            300
-          );
+        
         }
+
       } catch (error) {
       } finally {
         // 解锁

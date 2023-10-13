@@ -118,6 +118,9 @@ class TaskSevice extends Service {
     if (!task_id) return null;
 
     let result = await this.ctx.model.Task.findOne({ _id: task_id });
+    // 如果此任务已经被删除，就不需要执行了。
+    // 加入task_queue_doing_的任务也会因为任务删除而不再重复加入执行，不用担心
+    if(!result || result== null) return null;
     // 记录任务开始时间
     result.start_time = new Date().getTime();
     result.status = 1;
@@ -219,10 +222,16 @@ class TaskSevice extends Service {
   /**
    * 获得我的任务列表
    */
-  async getMyList(user_id, page = 1, page_size = 10 ) {
+  async getMyList(user_id, last_id='', first_id='', page_size = 10 ) {
     const { app, ctx } = this;
+    let query = {  user_id: user_id };
+    if(last_id != '') query._id = { $lt: last_id };
     // 获得我的任务列表
-    let list = await ctx.model.Task.find({ user_id: user_id },"name first_img type status create_time result rank params").sort({create_time:-1}).skip((page-1)*page_size).limit(page_size);
+    console.log("query",query )
+    let list = await ctx.model.Task
+    .find(query,"name first_img type status create_time result rank params")
+      .sort({ _id: -1 }) 
+      .limit(page_size);
     if(!list) return [];
     let res_list=[];
     // 获得任务排名
@@ -315,6 +324,7 @@ class TaskSevice extends Service {
           // 更新任务结果
           task.result = data.data;
           task.status = 2;
+          task.end_time = new Date().getTime();
         } else {
           task.status = 4;
           task.result_remark = error.message || '';
@@ -334,6 +344,31 @@ class TaskSevice extends Service {
         app.redis.sUnLock(cache_key, selfMark);
       }
     }
+  }
+
+  /**
+   * 删除任务
+   * @param {*} task_id 
+   * @param {*} user_id 
+   */
+  async del(task_id,user_id)
+  {
+    const { app, ctx } = this;
+    let task = await this.ctx.model.Task.findOne({ _id: task_id,user_id:user_id });
+    if(!task) throw ctx.ltool.err('任务不存在', 20001);
+    if(task.user_id != user_id) throw ctx.ltool.err('任务ID错误', 20002);
+    await this.ctx.model.Task.deleteOne({ _id: task_id,user_id:user_id });
+
+
+    // 如果此任务已经被删除，就不会再执行了。
+    // 加入task_queue_doing_的任务也会因为任务删除而不再重复加入执行，不用担心
+
+
+    // // 如果任务未完成，需要记录此任务已经取消
+    // if(task.status != 2){
+    //   await app.redis.sadd("cancel:task_list",task_id)
+    // }
+    return true;
   }
 }
 

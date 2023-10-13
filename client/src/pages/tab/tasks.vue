@@ -23,18 +23,18 @@
         去创建一个写真</lbutton
       >
     </div>
-    <div class="flex-1 overflow-hidden" v-if="list != null && list.length>0">
+    <div class="flex-1 overflow-hidden" v-else-if="list != null && list.length > 0">
       <template>
-        <scroll-view class="h-full" scroll-y="true">
+        <scroll-view class="h-full" scroll-y="true" @scrolltolower="moreList" @refresherrefresh="refreshList">
           <div
             class="border-b-px border-b-gray-100 py-4 space-y-1 px-4"
             v-for="(item, index) in list"
             :key="'k' + index"
           >
             <div class="text-lg h-8 text-stone-800">
-              {{item.type_name}}
+              {{ item.type_name }}
               <template v-if="item.type == 2">
-                - {{ item.params.template.name}}
+                - {{ item.params.template.name }}
               </template>
             </div>
             <div
@@ -48,35 +48,57 @@
               "
             >
               <template v-for="(img, img_index) in item.result">
-                <whatImg class="w-full group-[.hw]:h-24 group-[.d]:h-56" v-if="img=='whatimg'" :key="'wi' + img_index"></whatImg>
-                <image v-else
+                <whatImg
+                  class="w-full group-[.hw]:h-24 group-[.d]:h-56"
+                  v-if="img == 'whatimg'"
+                  :key="'wi' + img_index"
+                ></whatImg>
+                <image
+                  v-else
                   :key="'i' + img_index"
                   class="w-full group-[.hw]:h-24"
                   :mode="item > 1 ? 'aspectFill' : 'widthFix'"
-                  src="https://file-1305732628.cos.ap-guangzhou.myqcloud.com/r/doppelganger/141151515/compress/f4.png"
+                  :src="cos_host + img.compress_img"
                   alt=""
+                  @tap="previewImage(index, img_index)"
                 />
               </template>
-             
             </div>
-            <div class="text-sm text-blue-600 flex items-center space-x-1">
-              <span  v-if="item.status == 0">任务排队中，当前第{{item.rank}}位</span>
-              <span  v-if="item.status == 1">任务正在执行，请稍等</span>
-              <span  v-if="item.status == 3">任务正在进入排队</span>
-              <div class="w-4 text-blue-500 overflow-hidden">
-                <svg-more class="animate-popup3"></svg-more>
+            <div
+              class="text-sm text-green-500 flex items-center space-x-1"
+              v-if="item.status == 2"
+            >
+              <span>任务已完成</span>
+            </div>
+            <template v-else>
+              <div
+                class="text-sm text-blue-600 flex items-center space-x-1"
+                
+              >
+                <span v-if="item.status == 0"
+                  >任务排队中，当前第{{ item.rank }}位</span
+                >
+                <span v-if="item.status == 1">任务正在执行，请稍等</span>
+                <span v-if="item.status == 3">任务正在进入排队</span>
+                <div class="w-4 text-blue-500 overflow-hidden">
+                  <svg-more class="animate-popup3"></svg-more>
+                </div>
               </div>
-            </div>
+            </template>
+
             <div class="flex h-6 items-center justify-between">
-              <div class="text-sm text-gray-400">{{item.create_time_format}}</div>
-              <div class="bg-gray-200 px-2 rounded w-9 h-5">
-                <svg-more></svg-more>
+                <div class="text-sm text-gray-400">
+                  {{ item.create_time_format }}
+                </div>
+                <div class="bg-gray-200 px-2 rounded w-9 h-5">
+                  <svg-more></svg-more>
+                </div>
               </div>
-            </div>
           </div>
         </scroll-view>
       </template>
     </div>
+    <div clas="flex-1" v-else></div>
     <tab-bar :selectIndex="1"></tab-bar>
   </phone-container>
 </template>
@@ -92,14 +114,18 @@ export default {
   data() {
     return {
       firstload: false,
-      list: null,
+      moreload:false,
+      list: [],
       error: "",
+      cos_host: process.env.VUE_APP_COS_HOST,
+      last_id:"",
     };
   },
   // async onLoad() {
   //   await this.getList();
   // },
-  async onShow(){
+  async onShow() {
+    this.list = [];
     await this.getList();
   },
   methods: {
@@ -108,16 +134,38 @@ export default {
       try {
         const url = "/task/list";
         const params = {};
-        const res = await this.$http.get(url, params, 2);
+        if(that.list && that.list.length > 0){
+          params.last_id = that.list[that.list.length - 1]._id;
+        }
+        const res = await that.$http.get(url, params, 2);
         console.log("res", res);
         if (res && res.code == 1) {
-          this.list = res.data;
-          console.log("list", this.list);
+          if (res.data && res.data.length > 0) {
+              that.list = that.list.concat(res.data);
+          }
+          console.log("list", that.list);
         } else this.error = res.message;
       } catch (error) {
         this.error = error.message;
+        console.log("error", error);
       } finally {
         that.firstload = true;
+      }
+    },
+    refreshList(){
+      console.log("**************refreshList**************")
+    },
+    async moreList(){
+      console.log("**************moreList**************")
+      try {
+        this.moreload = true;
+        await this.getList();
+
+      } catch (error) {
+        
+      }
+      finally{
+        this.moreload = false;
       }
     },
     addTask() {
@@ -125,8 +173,21 @@ export default {
         url: "/pages/guide/step",
       });
     },
+
+    previewImage(index, img_index) {
+      let that = this;
+      let urls = [];
+      that.list[index].result.forEach((item) => {
+        urls.push(this.cos_host + item.origin_img);
+      });
+      console.log("previewImage", index, img_index);
+      uni.previewImage({
+        current: img_index,
+        urls: urls,
+      });
+    },
   },
-  components: { svgMore, svgUser, svgAddTask, svgNoData, lbutton ,whatImg },
+  components: { svgMore, svgUser, svgAddTask, svgNoData, lbutton, whatImg },
 };
 </script>
 

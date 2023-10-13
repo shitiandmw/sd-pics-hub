@@ -27,10 +27,36 @@ class TaskController extends Controller {
         ctx.body = task._id;
     }
     async getList(){
-        const { ctx } = this;
-        let list = await ctx.service.task.getMyList(ctx.user.id);
+        const { ctx,app } = this;
+        const input = ctx.request.query;
+        // 验证参数合法性
+        const errors = app.validator.validate(
+         {
+           last_id: { type: 'string' , required:false ,max: 24, min: 24},
+         },
+         input
+       );
+       if (errors && errors.length > 0)
+         throw ctx.ltool.err(`"${errors[0].field}"${errors[0].message}`, 40011);
+        let list = await ctx.service.task.getMyList(ctx.user.id,input.last_id);
         ctx.body = list;
     }
+
+    async del(){
+      const { ctx, app } = this;
+      const input = ctx.request.body;
+       // 验证参数合法性
+       const errors = app.validator.validate(
+        {
+          id: { type: 'string', required: true ,max: 24, min: 24},
+        },
+        input
+      );
+      if (errors && errors.length > 0)
+        throw ctx.ltool.err(`"${errors[0].field}"${errors[0].message}`, 40011);
+      return await ctx.service.task.del(input.id,ctx.user.id);
+    }
+
     // async getInfo(){
 
     // }

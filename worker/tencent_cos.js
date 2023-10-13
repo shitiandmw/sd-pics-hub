@@ -1,6 +1,7 @@
 var COS = require('cos-nodejs-sdk-v5');
 var ltool = require('./ltool');
-
+var path = require('path');
+const ll = path.sep;
 function tencent_cos(options) {
   this.getToken = options.getToken || null;
 
@@ -18,7 +19,7 @@ function tencent_cos(options) {
   ) {
     if (width || height) {
       // 临时压缩目录 \\tmp\\compress\\YYYYmmdd
-      let compress_path = __dirname + `\\tmp\\compress`;
+      let compress_path = __dirname + `${ll}tmp${ll}compress`;
       let day = ltool.formatTime2(new Date().valueOf(), 'YYYYMMDD');
       // 删除临时压缩目录下所有不是以 day 命名的文件夹
       await ltool.deleteDir(compress_path, day);
@@ -26,7 +27,7 @@ function tencent_cos(options) {
       // 从info.imgs[i]中获得后缀名
       let ext = path.basename(sys_path).split('.').pop();
 
-      compress_path = `${compress_path}\\${day}\\${ltool.uuid()}.${ext}`;
+      compress_path = `${compress_path}${ll}${day}${ll}${ltool.uuid()}.${ext}`;
 
       // 压缩图片
       let compress_res = await ltool.compressImg(
