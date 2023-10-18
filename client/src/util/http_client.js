@@ -145,6 +145,17 @@ const successback = async (res, depth, refunc, config) => {
     res.data.errorMsg = '登录过期，请重新登录';
     // localStorage.removeItem("app_login_user");
     // window.location.href = "./#/401";
+    // 获得当前页面
+    // let pages = getCurrentPages();
+    var pages = getCurrentPages();
+    let redirect = "";
+    if(pages.length>0){
+      var page = pages[pages.length - 1];
+      redirect = page.route;
+    }
+    uni.navigateTo({
+      url: "/pages/login?redirect="+redirect,
+    });
   } else if (res.data.code == '4001') {
     if (depth < 2 && typeof refunc == 'function') {
       await inittime();

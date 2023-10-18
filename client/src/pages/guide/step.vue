@@ -93,6 +93,7 @@ import templates from "../components/templates.vue";
 import templateDetail from "../components/templateDetail.vue";
 
 import addDoppelganger from "../components/addDoppelganger.vue";
+import { mapState, mapMutations, mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -115,6 +116,13 @@ export default {
     };
   },
   onLoad() {},
+  onShow(){
+    if (!this.user) {
+      uni.navigateTo({
+        url: "/pages/login?redirect=/pages/guide/step",
+      });
+    }
+  },
   methods: {
     switchStep: function (index) {
       this.step_index = index;
@@ -170,6 +178,9 @@ export default {
         url: "/pages/tab/tasks",
       });
     },
+  },
+  computed: {
+    ...mapState("user", ["user"]),
   },
   components: {
     steps,

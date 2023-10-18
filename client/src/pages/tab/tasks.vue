@@ -23,9 +23,17 @@
         去创建一个写真</lbutton
       >
     </div>
-    <div class="flex-1 overflow-hidden" v-else-if="list != null && list.length > 0">
+    <div
+      class="flex-1 overflow-hidden"
+      v-else-if="list != null && list.length > 0"
+    >
       <template>
-        <scroll-view class="h-full" scroll-y="true" @scrolltolower="moreList" @refresherrefresh="refreshList">
+        <scroll-view
+          class="h-full"
+          scroll-y="true"
+          @scrolltolower="moreList"
+          @refresherrefresh="refreshList"
+        >
           <div
             class="border-b-px border-b-gray-100 py-4 space-y-1 px-4"
             v-for="(item, index) in list"
@@ -71,10 +79,7 @@
               <span>任务已完成</span>
             </div>
             <template v-else>
-              <div
-                class="text-sm text-blue-600 flex items-center space-x-1"
-                
-              >
+              <div class="text-sm text-blue-600 flex items-center space-x-1">
                 <span v-if="item.status == 0"
                   >任务排队中，当前第{{ item.rank }}位</span
                 >
@@ -87,13 +92,13 @@
             </template>
 
             <div class="flex h-6 items-center justify-between">
-                <div class="text-sm text-gray-400">
-                  {{ item.create_time_format }}
-                </div>
-                <div class="bg-gray-200 px-2 rounded w-9 h-5">
-                  <svg-more></svg-more>
-                </div>
+              <div class="text-sm text-gray-400">
+                {{ item.create_time_format }}
               </div>
+              <div class="bg-gray-200 px-2 rounded w-9 h-5">
+                <svg-more></svg-more>
+              </div>
+            </div>
           </div>
         </scroll-view>
       </template>
@@ -110,23 +115,31 @@ import svgMore from "@/components/svg/svg-more.vue";
 import svgNoData from "@/components/svg/svg-nodata.vue";
 import svgAddTask from "@/components/svg/svg-addtask.vue";
 import whatImg from "@/components/what-img.vue";
+import { mapState, mapMutations, mapActions } from "vuex";
 export default {
   data() {
     return {
       firstload: false,
-      moreload:false,
+      moreload: false,
       list: [],
       error: "",
       cos_host: process.env.VUE_APP_COS_HOST,
-      last_id:"",
+      last_id: "",
     };
   },
   // async onLoad() {
   //   await this.getList();
   // },
   async onShow() {
-    this.list = [];
-    await this.getList();
+    if (!this.user) {
+      uni.navigateTo({
+        url: "/pages/login?redirect=/pages/tab/tasks",
+      });
+    } else {
+      this.firstload = false;
+      this.list = [];
+      await this.getList();
+    }
   },
   methods: {
     async getList() {
@@ -134,14 +147,14 @@ export default {
       try {
         const url = "/task/list";
         const params = {};
-        if(that.list && that.list.length > 0){
+        if (that.list && that.list.length > 0) {
           params.last_id = that.list[that.list.length - 1]._id;
         }
         const res = await that.$http.get(url, params, 2);
         console.log("res", res);
         if (res && res.code == 1) {
           if (res.data && res.data.length > 0) {
-              that.list = that.list.concat(res.data);
+            that.list = that.list.concat(res.data);
           }
           console.log("list", that.list);
         } else this.error = res.message;
@@ -152,19 +165,16 @@ export default {
         that.firstload = true;
       }
     },
-    refreshList(){
-      console.log("**************refreshList**************")
+    refreshList() {
+      console.log("**************refreshList**************");
     },
-    async moreList(){
-      console.log("**************moreList**************")
+    async moreList() {
+      console.log("**************moreList**************");
       try {
         this.moreload = true;
         await this.getList();
-
       } catch (error) {
-        
-      }
-      finally{
+      } finally {
         this.moreload = false;
       }
     },
@@ -186,6 +196,9 @@ export default {
         urls: urls,
       });
     },
+  },
+  computed: {
+    ...mapState("user", ["user"]),
   },
   components: { svgMore, svgUser, svgAddTask, svgNoData, lbutton, whatImg },
 };

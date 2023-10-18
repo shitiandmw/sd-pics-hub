@@ -11,13 +11,18 @@
         <div class="text-base text-gray-500 mb-2">
           选择一个你喜欢的写真模板，出片风格会与此模板相似
         </div> -->
-        <div class="pt-4 pb-8"><templates @select="selectTemplates" ></templates></div>
+        <div class="pt-4 pb-8">
+          <templates @select="selectTemplates"></templates>
+        </div>
       </scroll-view>
     </div>
     <lpopup v-model="template.show" class="">
       <div class="flex flex-col h-full">
         <div class="pb-6 pt-2 px-6 overflow-y-auto flex-1">
-          <template-detail :id="template.id" v-if="template.show"></template-detail>
+          <template-detail
+            :id="template.id"
+            v-if="template.show"
+          ></template-detail>
         </div>
         <div class="h-20 w-full px-6 py-2 translate-y-1">
           <lbutton class="shadow-xl">使用此模板创建写真</lbutton>
@@ -38,21 +43,30 @@ import lbutton from "@/components/button.vue";
 export default {
   data() {
     return {
-      template:{
-        show:false,
-        id:""
-      }
+      template: {
+        show: false,
+        id: "",
+      },
     };
   },
-   onLoad() {
+  onLoad() {},
+  onShow() {
+    if (!this.user) {
+      uni.navigateTo({
+        url: "/pages/login?redirect=/pages/tab/templates",
+      });
+    }
   },
   methods: {
-    selectTemplates(id){
+    selectTemplates(id) {
       this.template.id = id;
       this.template.show = true;
     },
   },
-  components: { svgHelp, templates, templateDetail,lpopup,lbutton },
+  computed: {
+    ...mapState("user", ["user"]),
+  },
+  components: { svgHelp, templates, templateDetail, lpopup, lbutton },
 };
 </script>
 

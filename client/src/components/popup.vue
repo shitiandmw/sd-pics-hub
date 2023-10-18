@@ -5,14 +5,14 @@
   >
     <view
       class="w-full h-full bg-black opacity-50 fixed z-40"
-      @click="input = false"
+      @click="closePopup()"
     ></view>
     <view
       class="animate-popup2 bg-white rounded-none rounded-t-xl z-50 bottom-0 w-full min-h-96 relative pt-2 max-h-9/10"
     >
-      <view
+      <view v-if="has_close"
         class="icon absolute right-4 top-4 w-8 h-8 z-50 p-2 bg-white shadow-lg rounded-full text-gray-500 cursor-pointer"
-        @click="input = false"
+        @click="closePopup()"
       >
         <svg-close></svg-close>
       </view>
@@ -26,6 +26,10 @@ import svgClose from "./svg/svg-close.vue";
 export default {
   props: {
     value: Boolean,
+    has_close: {
+      type: Boolean,
+      default: true,
+    },
   },
   model: {
     prop: "value", // 指定 v-model 要绑定的参数叫什么名字，来自于 props 中定义的参数
@@ -37,7 +41,12 @@ export default {
     };
   },
   onLoad() {},
-  methods: {},
+  methods: {
+    closePopup() {
+      if(this.has_close)
+        this.input = false;
+    },
+  },
   mounted() {},
   computed: {
     input: {

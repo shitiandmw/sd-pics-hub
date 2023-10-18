@@ -13,6 +13,9 @@
       "path": "pages/guide/step"
     },
     {
+      "path": "pages/login"
+    },
+    {
       "path": "pages/tab/tasks"
     },
     {

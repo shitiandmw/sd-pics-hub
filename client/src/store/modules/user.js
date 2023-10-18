@@ -30,5 +30,9 @@ export default {
         return res.data;
       } else return null;
     },
+    async logout({ commit }) {
+      uni.removeStorage("app_login_user");
+      commit('SET_USER_INFO', null);
+    }
   },
 };
