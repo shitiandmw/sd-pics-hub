@@ -16,7 +16,7 @@
         <view class="text-base text-gray-500">{{item.desc}}</view>
      </view>
      <view class="flex flex-col space-y-2">
-      <image v-for="(img,index) in item.imgs" :key="'i'+index"  :src="cos_host+img.compress_img" class="w-full" mode="widthFix" alt="">
+      <image lazy-load="true"  v-for="(img,index) in item.imgs" :key="index"  :src="cos_host+img.compress_img" class="w-full" mode="widthFix" alt="">
       </view>
     </template>
      

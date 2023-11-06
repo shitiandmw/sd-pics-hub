@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [],
+  
   purge: ['./index.html', './src/*.vue', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -76,4 +77,8 @@ module.exports = {
     },
   },
   plugins: [],
+  corePlugins: {
+    // 禁用掉在小程序环境中不可能用到的 plugins
+    container: false
+  }
 };

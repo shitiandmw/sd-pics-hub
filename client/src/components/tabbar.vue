@@ -7,7 +7,7 @@
       class="group w-16 flex flex-col items-center text-xs text-gray-500"
       :class="index == selectIndex ? 'text-primary' : ''"
       v-for="(item, index) in list"
-      :key="'tab' + index"
+      :key=" index"
       @tap="switchTab(index)"
     >
       <div class="w-6 h-6 mb-1">

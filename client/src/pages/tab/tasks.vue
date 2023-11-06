@@ -37,7 +37,7 @@
           <div
             class="border-b-px border-b-gray-100 py-4 space-y-1 px-4"
             v-for="(item, index) in list"
-            :key="'k' + index"
+            :key="index"
           >
             <div class="text-lg h-8 text-stone-800">
               {{ item.type_name }}
@@ -59,11 +59,11 @@
                 <whatImg
                   class="w-full group-[.hw]:h-24 group-[.d]:h-56"
                   v-if="img == 'whatimg'"
-                  :key="'wi' + img_index"
+                  :key="img_index"
                 ></whatImg>
-                <image
+                <image lazy-load="true" 
                   v-else
-                  :key="'i' + img_index"
+                  :key="img_index"
                   class="w-full group-[.hw]:h-24"
                   :mode="item > 1 ? 'aspectFill' : 'widthFix'"
                   :src="cos_host + img.compress_img"

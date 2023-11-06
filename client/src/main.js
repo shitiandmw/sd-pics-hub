@@ -8,8 +8,10 @@ import tabBar from 'components/tabbar.vue'
 import head from 'components/head.vue'
 import phoneContainer from 'components/phone-container.vue'
 import loading1 from 'components/loading1.vue'
-import vconsole from 'vconsole' 
-Vue.prototype.$vconsole = new vconsole()
+// import 'windi.css'
+import "./styles.css";
+// import vconsole from 'vconsole' 
+// Vue.prototype.$vconsole = new vconsole()
 Vue.component('tab-bar',tabBar)
 Vue.component('head-bar',head)
 Vue.component('load-panl1',loading1)

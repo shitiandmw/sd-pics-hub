@@ -73,7 +73,7 @@ const rsa = {
       prikey: rsa_key.exportKey("pkcs8-private-pem")
     };
     console.log("rsa_key_info.prikey", rsa_key_info.prikey)
-    sessionStorage.setItem(key, JSON.stringify(rsa_key_info));
+    uni.setStorageSync(key, JSON.stringify(rsa_key_info));
   },
   /*
    * 获得公钥
@@ -83,7 +83,7 @@ const rsa = {
     var t = this;
     var ret = "";
     key = key || "rsa_key_info";
-    var rsa_key_info = sessionStorage.getItem(key);
+    var rsa_key_info =  uni.getStorageSync(key);
     if (!rsa_key_info) {
       rsa.reload(key);
       ret = rsa_key.exportKey("pkcs8-public-pem");
@@ -113,7 +113,7 @@ const rsa = {
    */
   encrypt: (key, content) => {
     key = key || "rsa_key_info";
-    var rsa_key_info = sessionStorage.getItem(key);
+    var rsa_key_info =  uni.getStorageSync(key);
     if (!rsa_key_info) throw '不存在这个key，加密失败';
     rsa_key_info = JSON.parse(rsa_key_info);
     const nodersa = new NodeRSA(rsa_key_info.prikey);
@@ -137,7 +137,7 @@ const rsa = {
    */
   decrypt: (key, en_content) => {
     key = key || "rsa_key_info";
-    var rsa_key_info = sessionStorage.getItem(key);
+    var rsa_key_info =  uni.getStorageSync(key);
     if (!rsa_key_info) throw '不存在这个key，解密失败';
     rsa_key_info = JSON.parse(rsa_key_info);
     console.log("rsa_key_info.prikey", rsa_key_info.prikey)

@@ -3,7 +3,7 @@
     <div
       class="group flex-1 flex flex-col space-y-3 items-start text-xs first:items-start last:items-end last:absolute last:right-0"
       v-for="(item, index) in step_nodes"
-      :key="'tab' + index"
+      :key="index"
       @tap="switchStep(index)"
       :class="index == step_index ? 'step-active' : ''"
     >

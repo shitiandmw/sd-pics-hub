@@ -1,9 +1,9 @@
 <template>
   <view class="w-full grid grid-cols-2 gap-3">
-      <view class="overflow-hidden flex flex-col mb-1" v-for="(item,index) in list" :key="'k'+index" @tap="selectItem(item)">
+      <view class="overflow-hidden flex flex-col mb-1" v-for="(item,index) in list" :key="index" @tap="selectItem(item)">
         <template v-if="item.imgs && item.imgs.length>0">
           <div class="w-full aspect-square ">
-            <image mode="aspectFill"  :src="cos_host + item.imgs[0].compress_img" class="w-full h-full rounded-xl " alt="">
+            <image lazy-load="true" mode="aspectFill"  :src="cos_host + item.imgs[0].compress_img" class="w-full h-full rounded-xl " alt="">
           </div>
           
         </template>

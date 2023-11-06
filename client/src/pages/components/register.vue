@@ -1,7 +1,9 @@
 <template>
   <div class="w-full">
     <div class="mb-10">
-      <div class="text-3xl text-center font-bold">LOGO</div>
+      <div class="text-2xl font-bold flex items-center justify-center">
+        <image src="../../static/logo.png" class=" w-14 h-14 rounded-xl mr-2" mode="widthFix" alt="" /> 月亮相机
+      </div>
     </div>
     <div class="space-y-6 mb-8">
       <div

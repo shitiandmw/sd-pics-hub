@@ -88,6 +88,7 @@
     "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
+    "@dcasia/mini-program-tailwind-webpack-plugin": "^1.5.6",
     "@dcloudio/types": "^3.0.4",
     "@dcloudio/uni-automator": "^2.0.1-alpha-36920221121001",
     "@dcloudio/uni-cli-i18n": "^2.0.1-alpha-36920221121001",
@@ -109,9 +110,12 @@
     "mini-types": "*",
     "miniprogram-api-typings": "*",
     "postcss": "^8.4.21",
+    "postcss-class-rename": "^1.0.1",
     "postcss-comment": "^2.0.0",
     "tailwindcss": "^3.2.4",
-    "vue-template-compiler": ">= 2.6.14 < 2.7"
+    "tailwindcss-miniprogram-preset": "^2.1.2",
+    "vue-template-compiler": ">= 2.6.14 < 2.7",
+    "windicss-webpack-plugin": "^1.8.0"
   },
   "browserslist": [
     "Android >= 4.4",
