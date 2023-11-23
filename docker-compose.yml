@@ -1,19 +1,54 @@
 version: '3'
 services:
   api:
-    build: .
+    build:
+      context: ./api
+      dockerfile: Dockerfile
     volumes:
       - ./data/logs:/app/logs
+      - ./api/app:/app/app
+      - ./api/file:/app/file
+      - ./api/lib:/app/lib
     ports:
-      - "17001:7001"
+      - "17002:7002"
     depends_on:
       - mongodb
       - redis
-    container_name: emart-api
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: '2'
+    container_name: sd-pics-hub-api
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "17003:80"
+    volumes:
+      - ./client/dist/build/h5:/usr/share/nginx/html
+      - ./client/dist/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: '2'
+    container_name: sd-pics-hub-client
+
   redis:
     image: redis
     command: redis-server --requirepass lfluYk4reffZDjzzXfeNA2ub9odfJ1Ic
-    container_name: emart-redis
+    container_name: sd-pics-hub-redis
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: '2'
+
   mongodb:
     image: mongo:4.4.6
     volumes:
@@ -24,8 +59,22 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 100m
+        max-size: 50m
         max-file: '2'
     restart: always
-    container_name: emart-mongodb
-    
+    container_name: sd-pics-hub-mongodb
+
+  mongo_express:
+    image: mongo-express:latest
+    container_name: sd-pics-hub-mongodb-express
+    depends_on:
+      - mongodb
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb:27017
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=dbroot
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=Gri42Mvyk3j2PXIiTdn6CCA8JDSST7yv
+      - ME_CONFIG_BASICAUTH_USERNAME=dbroot
+      - ME_CONFIG_BASICAUTH_PASSWORD=Gri42Mvyk3j2PXIiTdn6CCA8JDSST7yv
+    ports:
+      - "17004:8081"
+    restart: always

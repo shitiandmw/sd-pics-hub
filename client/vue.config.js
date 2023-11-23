@@ -9,12 +9,16 @@
 //     }
 //   },
 // };
-
+const MiniProgramTailwindWebpackPlugin = require("@dcasia/mini-program-tailwind-webpack-plugin");
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
   // Other rules...
   configureWebpack: {
-    plugins: [new NodePolyfillPlugin()],
+    plugins: [
+      new NodePolyfillPlugin(),
+      new MiniProgramTailwindWebpackPlugin({
+        // options
+      })],
   },
 };

@@ -71,5 +71,18 @@
     },
     "mp-qq" : {
         "usingComponents" : true
+    },
+	"h5": {
+        "title": "演示",
+        "template": "/index.html",
+        "router": {
+            "mode": "history"
+        },
+        "async": {
+            "loading": "AsyncLoading",
+            "error": "AsyncError",
+            "delay": 200,
+            "timeout": 3000
+        }
     }
 }

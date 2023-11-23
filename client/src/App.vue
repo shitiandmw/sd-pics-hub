@@ -1,4 +1,3 @@
-
 <script>
 export default {
   onLaunch: function () {
@@ -15,5 +14,5 @@ export default {
 </script>
 
 <style>
-@import "./styles.css";
+@import url("./styles.css");
 </style>

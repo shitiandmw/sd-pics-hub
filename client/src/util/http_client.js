@@ -8,6 +8,7 @@ import { sign, rsa } from './crypto';
 import store from '../store';
 
 var baseURL_ = `${process.env.VUE_APP_API_HOST}`;
+// var baseURL_ = `/api`;
 
 //时间偏移量
 var time_offset = 0;
@@ -127,6 +128,11 @@ const errback = (error, config) => {
     }
     return Promise.resolve(error);
   }
+  else uni.showToast({
+    title: "网络错误，请稍后重试",
+    icon: "error",
+    duration: 2000,
+  });
   return Promise.resolve({
     data: error.message,
   });
@@ -136,10 +142,22 @@ const successback = async (res, depth, refunc, config) => {
   depth = depth || 1;
   console.log(`[${config.method}]${config.url} res:`, res.data);
   if (res.data.code == 401) {
-    store.commit('user/SET_LOGIN_TYPE', true);
+    uni.removeStorage("app_login_user");
+    store.commit('user/SET_USER_INFO', null);
     res.data.errorMsg = '登录过期，请重新登录';
     // localStorage.removeItem("app_login_user");
     // window.location.href = "./#/401";
+    // 获得当前页面
+    // let pages = getCurrentPages();
+    var pages = getCurrentPages();
+    let redirect = "";
+    if(pages.length>0){
+      var page = pages[pages.length - 1];
+      redirect = page.route;
+    }
+    uni.navigateTo({
+      url: "/pages/login?redirect="+redirect,
+    });
   } else if (res.data.code == '4001') {
     if (depth < 2 && typeof refunc == 'function') {
       await inittime();

@@ -3,13 +3,22 @@
 @tailwind utilities;
 
 @layer base {
+  body,uni-page-body {
+    @apply h-full;
+  }
   .phone-container {
-    @apply p-6 w-full h-screen box-border flex flex-col bg-slate-100;
+    @apply w-full min-h-full box-border flex flex-col bg-bg;
   }
 
   .phone-bg {
     @apply bg-slate-50;
   }
+
+  /* @supports (-webkit-touch-callout: none) {
+    .phone-container {
+      @apply h-safari-screen ;
+    }
+  } */
 }
 
 @layer components {
@@ -40,7 +49,7 @@
   }
 
   .head-util {
-    @apply h-14 w-full border-b border-gray-100 bg-slate-100 flex  items-center justify-center text-lg;
+    @apply h-14 w-full flex  items-center justify-center text-lg;
   }
   .loading {
     @apply w-5 h-5 border-2 border-transparent border-t-gray-200 border-b-gray-200 rounded-full animate-spin mr-2;
@@ -50,10 +59,11 @@
 .markdown-body pre {
   max-width: calc(100vw - 180px) !important;
 }
-.markdown-body ol,ul {
-    list-style: auto;
+.markdown-body ol,
+ul {
+  list-style: auto;
 }
 
-.vue-simple-markdown{
-    white-space: initial !important; 
+.vue-simple-markdown {
+  white-space: initial !important;
 }
