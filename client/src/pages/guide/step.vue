@@ -79,6 +79,23 @@
         </div>
       </div>
     </lpopup>
+
+
+    <lpopup v-model="select_dop_mode"  class="">
+      <div class="flex flex-col h-full">
+        <div class="pb-6 pt-2 px-6 overflow-y-auto flex-1">
+          <div class="h-12 text-lg">请选择数字分身</div>
+          <doppelgangers @select="selectDoppe"></doppelgangers>
+        </div>
+        <div class="h-20 w-full px-6 py-2 translate-y-1 flex space-x-2">
+          <lbutton class="shadow-xl" @tap="enterSelectDoppe"> <div class="w-4 h-4 mr-1"><svgEnter></svgEnter></div> 使用此数字分身</lbutton>
+          <lbutton class="shadow-xl w-44 bg-white text-gray-900 border border-dotted border-gray-900 " @tap="newDoppe" >
+            <div class="w-4 h-4 mr-1"><svgAdd></svgAdd></div>新创建
+          </lbutton>
+        </div>
+      </div>
+    </lpopup>
+    
   </phone-container>
 </template>
 
@@ -88,11 +105,14 @@ import steps from "./components/steps.vue";
 import cbutton from "@/components/button.vue";
 import lpopup from "@/components/popup.vue";
 import svgSuccess from "@/components/svg/svg-success.vue";
+import svgAdd from "@/components/svg/svg-add.vue";
+import svgEnter from "@/components/svg/svg-enter.vue";
 
 import templates from "../components/templates.vue";
 import templateDetail from "../components/templateDetail.vue";
 
 import addDoppelganger from "../components/addDoppelganger.vue";
+import doppelgangers from "../components/doppelgangers.vue";
 import { mapState, mapMutations, mapActions } from "vuex";
 export default {
   data() {
@@ -102,11 +122,14 @@ export default {
         _id: "",
         show: false,
       },
-
+      select_dop_mode:false,
+      select_dop_id:"",
       subdata: {
         select_template_id: "",
         select_doopelganger_id: "",
       },
+
+      
 
       sub_result: {
         success: false,
@@ -125,16 +148,48 @@ export default {
   },
   methods: {
     switchStep: function (index) {
-      this.step_index = index;
+      // this.step_index = index;
     },
     selectTemplates(id) {
       this.template._id = id;
       this.template.show = true;
     },
-    enterSelect() {
+    selectDoppe(id)
+    {
+      this.select_dop_id = id;
+    },
+    async enterSelect() {
       this.subdata.select_template_id = this.template._id;
       this.template.show = false;
       this.step_index = 1;
+      let count = await this.getDoppCount();
+      if(count>0){
+        this.select_dop_mode = true;
+      }
+    },
+
+    async enterSelectDoppe(id){
+      if(!this.select_dop_id)   uni.showToast({
+          title: error.message,
+          icon: "error",
+          duration: 4000,
+        });
+      else {
+        await this.createDoppelgangerSuccess(this.select_dop_id);
+        this.select_dop_mode = false;
+      }
+    },
+    newDoppe(){
+      this.select_dop_mode = false;
+    },
+    async getDoppCount()
+    {
+      let result = 0;
+      let url = "/doppelganger/count";
+      let params = {};
+      const res = await this.$http.get(url, params, 2);
+      if (res.code != 1 || res.data <=0 ) return result;
+      return res.data;
     },
     // 创建数字分身成功
     async createDoppelgangerSuccess(doopelganger_id) {
@@ -191,6 +246,9 @@ export default {
     lbutton,
     addDoppelganger,
     svgSuccess,
+    doppelgangers,
+    svgAdd,
+    svgEnter
   },
 };
 </script>

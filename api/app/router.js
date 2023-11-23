@@ -19,6 +19,8 @@ module.exports = app => {
   router.post('/doppelganger/create', controller.doppelganger.create); // 创建数字分身
   router.get('/doppelganger/list', controller.doppelganger.getList);    // 查看数字分身列表
   router.get('/doppelganger/getcostoken', controller.doppelganger.getCosToken); 
+  router.post('/doppelganger/del', controller.doppelganger.del); 
+  router.get('/doppelganger/count', controller.doppelganger.getUserCount); 
 
   /**---------------- 任务相关 ----------------**/
   router.post('/task/generate_portrait', controller.task.generatePortrait); // 创建任务写真任务

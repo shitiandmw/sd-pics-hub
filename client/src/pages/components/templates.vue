@@ -3,13 +3,13 @@
       <view class="overflow-hidden flex flex-col mb-1" v-for="(item,index) in list" :key="index" @tap="selectItem(item)">
         <template v-if="item.imgs && item.imgs.length>0">
           <div class="w-full aspect-square ">
-            <image lazy-load="true" mode="aspectFill"  :src="cos_host + item.imgs[0].compress_img" class="w-full h-full rounded-xl " alt="">
+            <image lazy-load="true" mode="aspectFill"  :src="cos_host + item.imgs[0].compress_img" class="w-full h-full rounded-xl " alt="" />
           </div>
           
         </template>
         <template v-else><div class="w-full h-52 bg-gray-100"></div></template>
         <view class="text-base mt-2">{{item.name}}</view>
-        <view class="text-xs mt-1 text-gray-400">此女之在画中游</view>
+        <view class="text-xs mt-1 text-gray-400">此女只在画中游</view>
       </view>
   </view>
 </template>

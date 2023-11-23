@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
+import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex);
 
@@ -7,6 +8,7 @@ import socket from "./modules/socket";
 import user from "./modules/user";
 
 export default new Vuex.Store({
+  plugins: [createPersistedState()],
   strict: false,
   modules:{
     socket,

@@ -31,6 +31,8 @@ class AppBootHook {
     //   // 可以做一些数据初始化等操作，这些操作成功才会启动应用
     //   // 例如：从数据库加载数据到内存缓存
     //   this.app.cacheData = await this.app.model.query(QUERY_CACHE_SQL);
+    const ctx = this.app.createAnonymousContext();
+    ctx.service.template.init();
   }
 
   async didReady() {

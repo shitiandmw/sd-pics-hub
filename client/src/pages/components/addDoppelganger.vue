@@ -9,9 +9,9 @@
       >
         体验模式
         <div
-          class="w-4 h-4 absolute -bottom-px -right-px invisible group-[.active]:visible"
+          class="flex items-center justify-center w-4 h-3 absolute -bottom-px -right-px invisible group-[.active]:visible rounded-tl-lg bg-primary text-white"
         >
-          <svgActivetab></svgActivetab>
+          <div class="w-2 h-2"><svgSuccess></svgSuccess></div>
         </div>
       </div>
       <div
@@ -21,9 +21,9 @@
       >
         高级模式
         <div
-          class="w-4 h-4 absolute -bottom-px -right-px invisible group-[.active]:visible"
+          class="flex items-center justify-center w-4 h-3 absolute -bottom-px -right-px invisible group-[.active]:visible rounded-tl-lg bg-primary text-white"
         >
-          <svgActivetab></svgActivetab>
+          <div class="w-2 h-2"><svgSuccess></svgSuccess></div>
         </div>
       </div>
     </div>

@@ -7,13 +7,13 @@ class DoppelgangerSevice extends Service {
    * 下载图片并压缩上传，获得压缩的图片地址
    * @param {*} url 远程图片地址(不带域名时默认使用cos域名)
    * @param {*} cos_path cos上传路径（不要带图片名称）
-   * @param {*} width 
-   * @param {*} height 
-   * @param {*} quality 
-   * @returns 
+   * @param {*} width
+   * @param {*} height
+   * @param {*} quality
+   * @returns
    */
-  async compressUploadImg(url,cos_path,width, height, quality) {
-    let {ctx,app} = this;
+  async compressUploadImg(url, cos_path, width, height, quality) {
+    let { ctx, app } = this;
     // 系统文件分割符
     let __ = path.sep;
     let day = ctx.ltool.formatTime2(new Date().valueOf(), "YYYYMMDD");
@@ -25,21 +25,24 @@ class DoppelgangerSevice extends Service {
     // 若不存在，则创建此目录
     if (!fs.existsSync(download_path))
       fs.mkdirSync(download_path, { recursive: true });
-    if (!url.startsWith('http://') && !url.startsWith('https://'))
+    if (!url.startsWith("http://") && !url.startsWith("https://"))
       url = app.config.tencent.cos.host + url;
     // 下载图片到指定的目录（1分钟内不重复下载）
-    let downloadFileName = await this.app.redis.sGet('download:' + ctx.ltool.md5(url), async () => {
-      return await ctx.ltool.downloadImg(
-        url,
-        download_path
-      );
-    });
+    let downloadFileName = await this.app.redis.sGet(
+      "download:" + ctx.ltool.md5(url),
+      async () => {
+        return await ctx.ltool.downloadImg(url, download_path);
+      }
+    );
     let compress_img = `${cos_path}${downloadFileName}`;
     let system_img = `${download_path}${__}${downloadFileName}`;
     await ctx.service.tencentCos.uploadImage(
       system_img,
       compress_img,
-      width,height,quality);
+      width,
+      height,
+      quality
+    );
     return compress_img;
   }
 
@@ -79,11 +82,23 @@ class DoppelgangerSevice extends Service {
    * 获得用户的数字分身列表
    * @param {*} user_id
    */
-  async getList(user_id) {
-    return await this.ctx.model.Doppelganger.find(
-      { user_id: user_id, is_delete: 0 },
-      "name type train_imgs train_status"
-    );
+  async getList(user_id, last_id = "", page_size = 10) {
+    let query = { user_id: user_id, is_delete: 0 };
+    if (last_id != "") query._id = { $lt: last_id };
+    let list = await this.ctx.model.Doppelganger.find(
+      query,
+      "name type train_imgs train_status create_time"
+    )
+      .sort({ _id: -1 })
+      .limit(page_size);
+    if (!list) return [];
+    let res_list=[];
+    for (let index = 0; index < list.length; index++) {
+      let item = list[index].toJSON();
+      item.create_time_format = this.ctx.ltool.formatTime(item.create_time,2);
+      res_list.push(item);
+    }
+    return res_list;
   }
 
   /**

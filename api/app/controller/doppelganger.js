@@ -65,9 +65,54 @@ class DoppelgangerController extends Controller {
   }
 
   async getList() {
-    const { ctx } = this;
-    let list = await ctx.service.doppelganger.getList(ctx.user.id);
+    const { ctx, app } = this;
+    const input = ctx.request.query;
+    // 验证参数合法性
+    const errors = app.validator.validate(
+      {
+        last_id: { type: "string", required: false, max: 24, min: 24 },
+      },
+      input
+    );
+    if (errors && errors.length > 0)
+      throw ctx.ltool.err(`"${errors[0].field}"${errors[0].message}`, 40011);
+    let list = await ctx.service.doppelganger.getList(
+      ctx.user.id,
+      input.last_id
+    );
     ctx.body = list;
+  }
+  /**
+   * 删除某个数字分身
+   */
+  async del() {
+    const { ctx, app } = this;
+    const input = ctx.request.body;
+    // 验证参数合法性
+    const errors = app.validator.validate(
+      {
+        id: { type: "string", required: false, max: 24, min: 24 },
+      },
+      input
+    );
+    if (errors && errors.length > 0)
+      throw ctx.ltool.err(`"${errors[0].field}"${errors[0].message}`, 40011);
+    let doppelganger = await ctx.service.doppelganger.getInfo(input.id);
+    if (!doppelganger || doppelganger.user_id != ctx.user.id)
+      throw ctx.ltool.err("删除数字分身失败", 40012);
+
+    await ctx.service.doppelganger.del(input.id);
+
+    ctx.body = "success";
+  }
+
+  /**
+   * 获得用户可用分身的数量
+   */
+  async getUserCount(){
+    const { ctx, app } = this;
+    let count = await ctx.service.doppelganger.getUserCount(ctx.user.id);
+    ctx.body = count;
   }
 
   async getCosToken() {

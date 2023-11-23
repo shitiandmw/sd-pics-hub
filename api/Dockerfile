@@ -28,7 +28,7 @@ RUN npm i --production --registry=https://registry.npmmirror.com
 # 拷贝所有源代码到工作目录
 COPY . /app
 
-RUN cd /app/lib/plugins/egg-lu-redis && npm i --registry=https://registry.npmmirror.com 
+# RUN cd /app/lib/plugins/egg-lu-redis && npm i --registry=https://registry.npmmirror.com 
 
 
 WORKDIR /app

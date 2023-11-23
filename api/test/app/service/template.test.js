@@ -13,11 +13,11 @@ describe('test/app/service/template.test.js', () => {
     //   assert(true);
     // });
 
-    // it('init()', async () => {
-    //   const res = await ctx.service.template.init();
-    //   console.log("res",res);
-    //   assert(true);
-    // });
+    it('init()', async () => {
+      const res = await ctx.service.template.init();
+      console.log("res",res);
+      assert(true);
+    });
    
     // it('list()', async () => {
     //   const res = await ctx.service.template.list();

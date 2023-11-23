@@ -8,6 +8,7 @@ import { sign, rsa } from './crypto';
 import store from '../store';
 
 var baseURL_ = `${process.env.VUE_APP_API_HOST}`;
+// var baseURL_ = `/api`;
 
 //时间偏移量
 var time_offset = 0;
@@ -141,7 +142,8 @@ const successback = async (res, depth, refunc, config) => {
   depth = depth || 1;
   console.log(`[${config.method}]${config.url} res:`, res.data);
   if (res.data.code == 401) {
-    store.commit('user/SET_LOGIN_TYPE', true);
+    uni.removeStorage("app_login_user");
+    store.commit('user/SET_USER_INFO', null);
     res.data.errorMsg = '登录过期，请重新登录';
     // localStorage.removeItem("app_login_user");
     // window.location.href = "./#/401";

@@ -87,6 +87,7 @@ import lbutton from "@/components/button.vue";
 import svgUser from "@/components/svg/svg-user.vue";
 import svgLock from "@/components/svg/svg-lock.vue";
 import svgEdit from "@/components/svg/svg-edit.vue";
+import {  mapActions } from "vuex";
 
 export default {
   data() {
@@ -105,6 +106,7 @@ export default {
   onLoad() {},
   methods: {
     async register() {
+      let t = this;
       if (
         !this.data.account ||
         !this.data.nick_name ||
@@ -158,6 +160,7 @@ export default {
             logintype: res.data.logintype,
           };
           uni.setStorageSync("app_login_user", JSON.stringify(app_login_user));
+          await t.init_user();
           uni.showModal({
             title: "系统提示",
             content: "恭喜你注册成功",
@@ -185,7 +188,24 @@ export default {
     },
     goSuccess(){
      this.$emit("success");
-    }
+    },
+    async init_user() {
+      let t = this;
+      let user_info = await t.load_user_info();
+      if (!user_info) {
+        uni.removeStorageSync("app_login_user");
+        uni.showToast({
+          title:"信息初始化失败，请重试",
+          icon: "error",
+          duration: 4000,
+        });
+        return false;
+      }
+      return true;
+    },
+    ...mapActions({
+      load_user_info: "user/load_user_info", // 将 `this.increment()` 映射为 `this.$store.dispatch('increment')`
+    }),
   },
   components: { svgUser, svgLock, lbutton, svgEdit },
 };

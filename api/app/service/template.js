@@ -1,6 +1,7 @@
 const { Service } = require('egg');
 const fsPromises = require('fs').promises;
 const path = require('path');
+let _ = path.sep;
 
 class TemplateSevice extends Service {
   /**
@@ -12,8 +13,8 @@ class TemplateSevice extends Service {
     try {
       const file_path = this.app.baseDir + folderPath;
       const files = await fsPromises.readdir(file_path); // Use fsPromises instead of fs
-      console.log("file_path",file_path)
-      console.log("files.length",files.length)
+      console.log("file_path", file_path)
+      console.log("files.length", files.length)
       const fileNames = [];
       for (const file of files) {
         let filename = path.join(this.app.baseDir + folderPath, file);
@@ -33,110 +34,127 @@ class TemplateSevice extends Service {
    * 初始化模板
    */
   async init() {
-    // 雪山写真
-    let templates = [
-      {
-        code: 'XZ_00001',
-        name: '半身雪景',
-        type: 'SD1.5',
-        tags: ['雪山', '写真', '真人'],
-        imgs: await this.listFilesInFolder(
-          '\\file\\images\\template\\XZ_00001'
-        ),
-        version: 1.03,
-        sex:0,
-        params: {
-          prompt:
-            'RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3, Screen Space Refraction, hyperdetailed, hyper quality, high detail, natural skin texture , 1 girl, (Snow Mountain:0.8), beautiful , Upper body, Snowing, Down jacket, (Beautiful woman:1.5), (pretty:1.5) ,',
-          negative_prompt:
-            '(nsfw:1.5),verybadimagenegative_v1.3, ng_deepnegative_v1_75t, (ugly face:0.8),cross-eyed,sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, facing away, tilted head, {Multiple people}, lowres, bad anatomy, bad hands, text, error, (missing fingers:1.3), extra digit, fewer digits, cropped, worstquality, low quality, normal quality, jpegartifacts, signature, watermark, username, blurry, bad feet, cropped, poorly drawn hands, poorly drawn face, mutation, deformed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, extra fingers, fewer digits, extra limbs, extra arms,extra legs, malformed limbs, (fused fingers:1.2), (too many fingers:1.2), long neck, cross-eyed,mutated hands, polar lowres, bad body, bad proportions, gross proportions, text, error, (missing fingers:1.5), missing arms, missing legs, extra digit, extra arms, extra leg, extra foot, ((repeating hair)),nsfw, ',
-          seed: -1,
-          batch_size: 3,
-          n_iter: 1,
-          steps: 30,
-          cfg_scale: 7,
-          width: 512,
-          height: 512,
-          send_images: true,
-          save_images: false,
-          sampler_index: 'Euler a',
-          override_settings: {
-            sd_model_checkpoint: 'realisticVisionV51_v51VAE.safetensors',
-            CLIP_stop_at_last_layers: 2,
-            sd_vae: 'vae-ft-mse-840000-ema-pruned_v10.0.pt',
-          },
-        },
-      },
-      {
-        code: 'XZ_00002',
-        name: '半身未来战士',
-        type: 'SD1.5',
-        tags: ['未来', '机甲', '真人'],
-        imgs: await this.listFilesInFolder(
-          '\\file\\images\\template\\XZ_00002'
-        ),
-        sex:0,
-        version: 1.03,
-        params: {
-          prompt:
-            '(detailed face, detailed eyes, clear skin, clear eyes), cgmech, beautiful eyes, upper body, portrait, robot, armor, 1girl, Chinese female, white shimmering hair, neon light, 8K, RAW, best quality, masterpiece, ultra high res, colorful, (medium wide shot), (dynamic perspective), sharp focus , (depth of field, bokeh:1.3), extremely detailed eyes and face, beautiful detailed eyes,(black gold, trimmed gear:1.2),(In a futuristic weapons factory:1.2), ((masterpiece, best quality)), <lora:more_details:0.3> Detailed background, spaceship interior <lora:menpo_offset:0.2>  <lora:Niji:0.6>',
-          negative_prompt:
-            '(nsfw:1.5),verybadimagenegative_v1.3, ng_deepnegative_v1_75t, (ugly face:0.8),cross-eyed,sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, facing away, tilted head, {Multiple people}, lowres, bad anatomy, bad hands, text, error, (missing fingers:1.3), extra digit, fewer digits, cropped, worstquality, low quality, normal quality, jpegartifacts, signature, watermark, username, blurry, bad feet, cropped, poorly drawn hands, poorly drawn face, mutation, deformed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, extra fingers, fewer digits, extra limbs, extra arms,extra legs, malformed limbs, (fused fingers:1.2), (too many fingers:1.2), long neck, cross-eyed,mutated hands, polar lowres, bad body, bad proportions, gross proportions, text, error, (missing fingers:1.5), missing arms, missing legs, extra digit, extra arms, extra leg, extra foot, ((repeating hair))',
-          seed: -1,
-          batch_size: 3,
-          n_iter: 1,
-          steps: 30,
-          cfg_scale: 7,
-          width: 512,
-          height: 768,
-          send_images: true,
-          save_images: false,
-          sampler_index: 'DPM++ 2M Karras',
-          override_settings: {
-            sd_model_checkpoint: 'absolutereality_v181.safetensors',
-            CLIP_stop_at_last_layers: 2,
-            sd_vae: 'vae-ft-mse-840000-ema-pruned_v10.0.pt',
-          },
-        },
-      },
-      {
-        code: 'XZ_00003',
-        name: '半身中世纪盔甲',
-        type: 'SD1.5',
-        tags: ['盔甲', '战士', '中世纪'],
-        imgs: await this.listFilesInFolder(
-          '\\file\\images\\template\\XZ_00003'
-        ),
-        sex:0,
-        version: 1.03,
-        params: {
-          prompt:
-            '(masterpiece), (extremely intricate:1.3), (realistic), Chinese female, portrait of a girl, the most beautiful in the world, silver armor, (medieval armor), metal reflections, upper body, outdoors, intense sunlight, far away castle, professional photograph of a stunning woman detailed, sharp focus, dramatic, award winning, cinematic lighting, octane render, unreal engine, volumetrics dtx, (film grain, bokeh, blurry foreground, blurry background)',
-          negative_prompt:
-            '(UnrealisticDream:1.3),(nsfw:1.5),hat,(helmet:1.2),verybadimagenegative_v1.3, ng_deepnegative_v1_75t, (ugly face:0.8),cross-eyed,sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, facing away, tilted head, Multiple people, lowres, bad anatomy, bad hands, text, error, (missing fingers:1.3), extra digit, fewer digits, cropped, worstquality, low quality, normal quality, jpegartifacts, signature, watermark, username, blurry, bad feet, cropped, poorly drawn hands, poorly drawn face, mutation, deformed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, extra fingers, fewer digits, extra limbs, extra arms,extra legs, malformed limbs, (fused fingers:1.2), (too many fingers:1.2), long neck, cross-eyed,mutated hands, polar lowres, bad body, bad proportions, gross proportions, text, error, (missing fingers:1.5), missing arms, missing legs, extra digit, extra arms, extra leg, extra foot, ((repeating hair))',
-          seed: -1,
-          batch_size: 3,
-          n_iter: 1,
-          steps: 30,
-          cfg_scale: 7,
-          width: 512,
-          height: 768,
-          send_images: true,
-          save_images: false,
-          sampler_index: 'DPM++ 2M Karras',
-          override_settings: {
-            sd_model_checkpoint: 'absolutereality_v181.safetensors',
-            CLIP_stop_at_last_layers: 2,
-            sd_vae: 'vae-ft-mse-840000-ema-pruned_v10.0.pt',
-          },
-        },
-      },
-    ];
+    console.log("init template ... ");
+    // 记录上次数据是否有变化
+    let cache_key = `template_init`;
+    let {app , ctx } = this;
+    // 加个锁，防止并发
+    const selfMark = await app.redis.sLock(cache_key, 20);
+    if (selfMark) {
+      try {
+        // 如果没有初始化过数据，才添加数据
+        let templateCount = await ctx.model.Template.find({}).countDocuments({});
+        if (templateCount <= 0) {
+          // 雪山写真
+          let templates = [
+            {
+              code: 'XZ_00001',
+              name: '半身雪景',
+              type: 'SD1.5',
+              tags: ['雪山', '写真', '真人'],
+              imgs: await this.listFilesInFolder(
+                `${_}file${_}images${_}template${_}XZ_00001`
+              ),
+              version: 1.03,
+              sex: 0,
+              params: {
+                prompt:
+                  'RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3, Screen Space Refraction, hyperdetailed, hyper quality, high detail, natural skin texture , 1 girl, (Snow Mountain:0.8), beautiful , Upper body, Snowing, Down jacket, (Beautiful woman:1.5), (pretty:1.5) ,',
+                negative_prompt:
+                  '(nsfw:1.5),verybadimagenegative_v1.3, ng_deepnegative_v1_75t, (ugly face:0.8),cross-eyed,sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, facing away, tilted head, {Multiple people}, lowres, bad anatomy, bad hands, text, error, (missing fingers:1.3), extra digit, fewer digits, cropped, worstquality, low quality, normal quality, jpegartifacts, signature, watermark, username, blurry, bad feet, cropped, poorly drawn hands, poorly drawn face, mutation, deformed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, extra fingers, fewer digits, extra limbs, extra arms,extra legs, malformed limbs, (fused fingers:1.2), (too many fingers:1.2), long neck, cross-eyed,mutated hands, polar lowres, bad body, bad proportions, gross proportions, text, error, (missing fingers:1.5), missing arms, missing legs, extra digit, extra arms, extra leg, extra foot, ((repeating hair)),nsfw, ',
+                seed: -1,
+                batch_size: 3,
+                n_iter: 1,
+                steps: 30,
+                cfg_scale: 7,
+                width: 512,
+                height: 512,
+                send_images: true,
+                save_images: false,
+                sampler_index: 'Euler a',
+                override_settings: {
+                  sd_model_checkpoint: 'realisticVisionV51_v51VAE.safetensors',
+                  CLIP_stop_at_last_layers: 2,
+                  sd_vae: 'vae-ft-mse-840000-ema-pruned_v10.0.pt',
+                },
+              },
+            },
+            {
+              code: 'XZ_00002',
+              name: '半身未来战士',
+              type: 'SD1.5',
+              tags: ['未来', '机甲', '真人'],
+              imgs: await this.listFilesInFolder(
+                `${_}file${_}images${_}template${_}XZ_00002`
+              ),
+              sex: 0,
+              version: 1.03,
+              params: {
+                prompt:
+                  '(detailed face, detailed eyes, clear skin, clear eyes), cgmech, beautiful eyes, upper body, portrait, robot, armor, 1girl, Chinese female, white shimmering hair, neon light, 8K, RAW, best quality, masterpiece, ultra high res, colorful, (medium wide shot), (dynamic perspective), sharp focus , (depth of field, bokeh:1.3), extremely detailed eyes and face, beautiful detailed eyes,(black gold, trimmed gear:1.2),(In a futuristic weapons factory:1.2), ((masterpiece, best quality)), <lora:more_details:0.3> Detailed background, spaceship interior <lora:menpo_offset:0.2>  <lora:Niji:0.6>',
+                negative_prompt:
+                  '(nsfw:1.5),verybadimagenegative_v1.3, ng_deepnegative_v1_75t, (ugly face:0.8),cross-eyed,sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, facing away, tilted head, {Multiple people}, lowres, bad anatomy, bad hands, text, error, (missing fingers:1.3), extra digit, fewer digits, cropped, worstquality, low quality, normal quality, jpegartifacts, signature, watermark, username, blurry, bad feet, cropped, poorly drawn hands, poorly drawn face, mutation, deformed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, extra fingers, fewer digits, extra limbs, extra arms,extra legs, malformed limbs, (fused fingers:1.2), (too many fingers:1.2), long neck, cross-eyed,mutated hands, polar lowres, bad body, bad proportions, gross proportions, text, error, (missing fingers:1.5), missing arms, missing legs, extra digit, extra arms, extra leg, extra foot, ((repeating hair))',
+                seed: -1,
+                batch_size: 3,
+                n_iter: 1,
+                steps: 30,
+                cfg_scale: 7,
+                width: 512,
+                height: 768,
+                send_images: true,
+                save_images: false,
+                sampler_index: 'DPM++ 2M Karras',
+                override_settings: {
+                  sd_model_checkpoint: 'absolutereality_v181.safetensors',
+                  CLIP_stop_at_last_layers: 2,
+                  sd_vae: 'vae-ft-mse-840000-ema-pruned_v10.0.pt',
+                },
+              },
+            },
+            {
+              code: 'XZ_00003',
+              name: '半身中世纪盔甲',
+              type: 'SD1.5',
+              tags: ['盔甲', '战士', '中世纪'],
+              imgs: await this.listFilesInFolder(
+                `${_}file${_}images${_}template${_}XZ_00003`
+              ),
+              sex: 0,
+              version: 1.03,
+              params: {
+                prompt:
+                  '(masterpiece), (extremely intricate:1.3), (realistic), Chinese female, portrait of a girl, the most beautiful in the world, silver armor, (medieval armor), metal reflections, upper body, outdoors, intense sunlight, far away castle, professional photograph of a stunning woman detailed, sharp focus, dramatic, award winning, cinematic lighting, octane render, unreal engine, volumetrics dtx, (film grain, bokeh, blurry foreground, blurry background)',
+                negative_prompt:
+                  '(UnrealisticDream:1.3),(nsfw:1.5),hat,(helmet:1.2),verybadimagenegative_v1.3, ng_deepnegative_v1_75t, (ugly face:0.8),cross-eyed,sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, facing away, tilted head, Multiple people, lowres, bad anatomy, bad hands, text, error, (missing fingers:1.3), extra digit, fewer digits, cropped, worstquality, low quality, normal quality, jpegartifacts, signature, watermark, username, blurry, bad feet, cropped, poorly drawn hands, poorly drawn face, mutation, deformed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, extra fingers, fewer digits, extra limbs, extra arms,extra legs, malformed limbs, (fused fingers:1.2), (too many fingers:1.2), long neck, cross-eyed,mutated hands, polar lowres, bad body, bad proportions, gross proportions, text, error, (missing fingers:1.5), missing arms, missing legs, extra digit, extra arms, extra leg, extra foot, ((repeating hair))',
+                seed: -1,
+                batch_size: 3,
+                n_iter: 1,
+                steps: 30,
+                cfg_scale: 7,
+                width: 512,
+                height: 768,
+                send_images: true,
+                save_images: false,
+                sampler_index: 'DPM++ 2M Karras',
+                override_settings: {
+                  sd_model_checkpoint: 'absolutereality_v181.safetensors',
+                  CLIP_stop_at_last_layers: 2,
+                  sd_vae: 'vae-ft-mse-840000-ema-pruned_v10.0.pt',
+                },
+              },
+            },
+          ];
 
-    for (let i = 0; i < templates.length; i++) {
-      await this.saveByCode(templates[i]);
+          for (let i = 0; i < templates.length; i++) {
+            await this.saveByCode(templates[i]);
+          }
+        }
+      } catch (error) {
+      } finally {
+        // 解锁
+        app.redis.sUnLock(cache_key, selfMark);
+      }
     }
-
     return true;
   }
 
@@ -162,9 +180,9 @@ class TemplateSevice extends Service {
           let ext = info.imgs[i].split('.').pop();
 
           // 压缩图片
-          let compress_path = `${img_path}\\compress\\${img_name}`;
-          let compress_res = await ctx.ltool.compressImg(info.imgs[i], compress_path, 350,0,90);
-          if(!compress_res) throw ctx.ltool.err('压缩图片失败', 10002);
+          let compress_path = `${img_path}${_}compress${_}${img_name}`;
+          let compress_res = await ctx.ltool.compressImg(info.imgs[i], compress_path, 350, 0, 90);
+          if (!compress_res) throw ctx.ltool.err('压缩图片失败', 10002);
           let cos_filename = ctx.ltool.uuid();
           let cos_file = `${cos_path}/${cos_filename}.${ext}`;
           let cos_compress_file = `${cos_path}/compress/${cos_filename}.${ext}`;
@@ -226,7 +244,7 @@ class TemplateSevice extends Service {
     let ctx = this.ctx;
     let pageSize = 10;
     let total = await ctx.model.Template.countDocuments({});
-    let list = await ctx.model.Template.find({},"_id imgs name tags")
+    let list = await ctx.model.Template.find({}, "_id imgs name tags")
       .sort({ create_time: -1 })
       .skip((page - 1) * pageSize)
       .limit(pageSize);
@@ -242,7 +260,7 @@ class TemplateSevice extends Service {
    */
   async info(id) {
     let ctx = this.ctx;
-    let template = await ctx.model.Template.findOne({ _id: id },"name imgs desc");
+    let template = await ctx.model.Template.findOne({ _id: id }, "name imgs desc");
     if (!template) throw ctx.ltool.err('模板不存在', 10001);
     return template;
   }
@@ -252,7 +270,7 @@ class TemplateSevice extends Service {
    * @param {*} id 
    * @returns 
    */
-  async detail (id) {
+  async detail(id) {
     let ctx = this.ctx;
     let template = await ctx.model.Template.findOne({ _id: id });
     if (!template) throw ctx.ltool.err('模板不存在', 10001);

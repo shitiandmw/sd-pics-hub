@@ -15,11 +15,11 @@ var ltool = require('./ltool');
 const config = {
   source: 'aliyun',
   socket: {
-    host: 'http://127.0.0.1:7002',
+    host: 'http://127.0.0.1:17002',
     token: '123456',
   },
   api: {
-    host: 'http://127.0.0.1:7002',
+    host: 'http://127.0.0.1:17002',
   },
   sd_base_url: 'http://175.178.243.32:27301',
 };
@@ -251,8 +251,10 @@ async function doTask2(task_info) {
 (async () => {
   // 读取配置信息
   let device_config = await readConfig();
+  console.log("device_config",device_config)
   // 获得当前设备系统信息
   let device_info = await getDeviceInfo();
+  console.log("device_info",device_info)
   console.log(typeof device_info);
   const socket = io(config.socket.host, {
     autoConnect: true,

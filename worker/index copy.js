@@ -15,11 +15,11 @@ var ltool = require('./ltool');
 const config = {
   source: 'aliyun',
   socket: {
-    host: 'http://127.0.0.1:7002',
+    host: 'http://127.0.0.1:17002',
     token: '123456',
   },
   api: {
-    host: 'http://127.0.0.1:7002',
+    host: 'http://127.0.0.1:17002',
   },
   sd_base_url: 'http://175.178.243.32:27301',
 };
